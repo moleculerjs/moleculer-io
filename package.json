@@ -1,0 +1,18 @@
+{
+  "name": "moleculer-socket.io",
+  "version": "0.0.1",
+  "description": "An API GateWay service for moleculerjs using socket.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "tiaod",
+  "license": "ISC",
+  "dependencies": {
+    "debug": "^3.1.0",
+    "lodash": "^4.17.10",
+    "moleculer": "^0.12.8",
+    "nanomatch": "^1.2.9",
+    "socket.io": "^2.1.1"
+  }
+}
