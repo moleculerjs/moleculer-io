@@ -8,36 +8,48 @@ const { BadRequestError } = require('./errors')
 module.exports = {
   name:'io',
   settings:{
+    // port: 3001,
     options: {}, //socket.io options
-    routes:[
-      {
-        namespace: '/', //default
+    namespaces:{
+      '/': {
         // middlewares: [],
         socket: {
-          event:'call',
-          // middlewares:[],
-          // whitelist: [],
-          // callOptions: {}
+          // middlewares: [],
+          events: {
+            call: {
+              // whitelist: [],
+              // callOptions: {}
+            }
+          }
         }
       }
-    ]
+    }
   },
   created(){
-    // this.routes = {} //handlers
-    // for(let item of this.settings.routes){ //attach new actions
-    //   this.logger.info('Add handler:', item)
-    //   this.routes[item.event] = this.makeHandler(item)
-    // }
     this.handlers = {} //
-    for(let item of this.settings.routes){
+    for(let nsp in this.settings.namespaces){
+      let item = this.settings.namespaces[nsp]
       this.logger.info('Add handler:', item)
-      if(!this.handlers[item.namespace]) this.handlers[item.namespace] = {}
-      this.handlers[item.namespace][item.socket.event] = this.makeHandler(item)
+      if(!this.handlers[nsp]) this.handlers[nsp] = {}
+      let events = item.socket.events
+      for(let eventName in events){
+        this.handlers[nsp][eventName] = this.makeHandler(
+          eventName,
+          events[eventName].whitelist,
+          events[eventName].callOptions,
+        )
+      }
     }
   },
   methods: {
-    listen(server){
-      this.io = IO.listen(server)
+    initServer(srv, opts){
+      if ('object' == typeof srv && srv instanceof Object && !srv.listen) {
+        opts = srv;
+        srv = null;
+      }
+      opts = opts || this.settings.options
+      srv = srv || this.settings.port
+      this.io = new IO(srv, opts)
     },
     checkWhitelist(action, whitelist) {
 			return whitelist.find(mask => {
@@ -57,11 +69,7 @@ module.exports = {
       debug('Call action:', action, params, opts)
       return await this.broker.call(action, params, opts)
     },
-    makeHandler:function(item){
-      let namespace = item.namespace
-      let eventName = item.socket.event
-      let whitelist = item.socket.whitelist
-      let opts = item.socket.callOptions
+    makeHandler:function(eventName, whitelist, opts){
       debug('MakeHandler', eventName)
       const svc = this
       return async function(action, params, respond){
@@ -94,35 +102,36 @@ module.exports = {
   },
   started(){
     if(!this.io){
-      throw new Error('No io object.')
+      this.initServer()
     }
-    for(let item of this.settings.routes){
-      let nsp = item.namespace || '/'
-      let eventName = item.socket.event
+    for(let nsp in this.settings.namespaces){
+      // let nsp = item.namespace || '/'
+      let item = this.settings.namespaces[nsp]
       let namespace = this.io.of(nsp)
       if(item.middlewares){ //Server middlewares
         for(let middleware of item.middlewares){
           namespace.use(middleware)
         }
       }
-
       namespace.on('connection', socket=>{
-        this.logger.info(`[${nsp}]Client connected:`,socket.id)
+        this.logger.info(`(nsp:'${nsp}') Client connected:`,socket.id)
         if(item.socket.middlewares){ //socketmiddlewares
-          for(let middleware of item.socket.middlewares){
+          for(let middleware of this.handlers[nsp]){
             socket.use(middleware)
           }
         }
-        debug('Attach event:', eventName)
-        socket.on(eventName, this.handlers[nsp][eventName])
+        for(let eventName in item.socket.events){
+          debug('Attach event:', eventName)
+          socket.on(eventName, this.handlers[nsp][eventName])
+        }
       })
     }
-    this.io.on('connection', client=>{
-      this.logger.info('Client connected:', client.id)
-      for(let event in this.routes){
-        debug('Attach event:', event)
-        client.on(event, this.routes[event]) //attach to socket
-      }
-    })
+    // this.io.on('connection', client=>{
+    //   this.logger.info('Client connected:', client.id)
+    //   for(let event in this.routes){
+    //     debug('Attach event:', event)
+    //     client.on(event, this.routes[event]) //attach to socket
+    //   }
+    // })
   }
 }

@@ -31,21 +31,11 @@ broker.createService({
 })
 
 const ioService = broker.createService({
-  name: 'socketio',
-  mixins: [SocketIOService],
-  settings: {
-    routes:[
-      {
-        event: 'call',
-        whitelist: [
-          'math.*'
-        ]
-      }
-    ]
-  }
+  name: 'io',
+  mixins: [SocketIOService]
 })
 
-ioService.listen(server)
+ioService.initServer(server)
 
 broker.start()
 
