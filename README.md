@@ -52,12 +52,12 @@ broker.start()
 ```
 By default, `moleculer-io` handle the `call` event which will proxy to moleculer's `broker.call`
 Examples:
-- Call `test.hello` action: `socket.emit('call','test.hello', callback)`
+- Call `test.hello` action: `socket.emit('call','test.hello', null, callback)`
 - Call `math.add` action with params: `socket.emit('call','math.add', {a:25, b:13}, callback)`
 - Get health info of node: `socket.emit('call','$node.health', callback)`
 - List all actions: `socket.emit('call', '$node.list', callback)`
 
-Example client code:
+**Example client:**
 ```javascript
 const io = require('socket.io-client')()
 const socket = io('http://localhost:3000')
@@ -81,7 +81,7 @@ settings: {
         middlewares: [], //socket middlewares
         events: {
           'call': { //eventName
-            whitelist: [], //event whitelists
+            whitelist: [], //action whitelists
             callOptions: {} //call options
           }
         }
