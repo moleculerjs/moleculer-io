@@ -32,13 +32,10 @@
 		function callMath() {
 			let a = Math.round(Math.random() * 100);
 			let b = Math.round(Math.random() * 100);
-			socket.emit("call", {
-				action: "math.add",
-				params: {
+			socket.emit("call", "math.add",{
 					a: a,
 					b: b
-				}
-			}, (err,res) => {
+				}, (err,res) => {
 				if(err){
           alert(JSON.stringify(err))
         }else{

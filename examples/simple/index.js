@@ -38,7 +38,7 @@ const ioService = broker.createService({
       {
         event: 'call',
         whitelist: [
-          'math.sub'
+          'math.*'
         ]
       }
     ]

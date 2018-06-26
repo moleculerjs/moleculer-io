@@ -1,5 +1,5 @@
 const IO = require('socket.io')
-const debug = require('debug')('moleculer-socket.io')
+const debug = require('debug')('moleculer-io')
 const _ = require('lodash')
 const nanomatch = require('nanomatch')
 const { ServiceNotFoundError } = require("moleculer").Errors;
@@ -8,18 +8,31 @@ const { BadRequestError } = require('./errors')
 module.exports = {
   name:'io',
   settings:{
+    options: {}, //socket.io options
     routes:[
       {
-        event: 'call', //default
-        // whitelist: [],
+        namespace: '/', //default
+        // middlewares: [],
+        socket: {
+          event:'call',
+          // middlewares:[],
+          // whitelist: [],
+          // callOptions: {}
+        }
       }
     ]
   },
   created(){
-    this.routes = {} //handlers
-    for(let item of this.settings.routes){ //attach new actions
+    // this.routes = {} //handlers
+    // for(let item of this.settings.routes){ //attach new actions
+    //   this.logger.info('Add handler:', item)
+    //   this.routes[item.event] = this.makeHandler(item)
+    // }
+    this.handlers = {} //
+    for(let item of this.settings.routes){
       this.logger.info('Add handler:', item)
-      this.routes[item.event] = this.makeHandler(item)
+      if(!this.handlers[item.namespace]) this.handlers[item.namespace] = {}
+      this.handlers[item.namespace][item.socket.event] = this.makeHandler(item)
     }
   },
   methods: {
@@ -45,20 +58,19 @@ module.exports = {
       return await this.broker.call(action, params, opts)
     },
     makeHandler:function(item){
-      let eventName = item.event
-      let type = item.type || 'call' // handler type. ['call', 'login']
-      let whitelist = item.whitelist
-      let opts = item.callOptions
+      let namespace = item.namespace
+      let eventName = item.socket.event
+      let whitelist = item.socket.whitelist
+      let opts = item.socket.callOptions
       debug('MakeHandler', eventName)
       const svc = this
-      return async function(data, respond){
-        debug(`Handle ${eventName} event:`,data)
-        if(!data || !_.isString(data.action)){
-          debug(`BadRequest:`,data)
+      return async function(action, params, respond){
+        debug(`Handle ${eventName} event:`,action, params)
+        if(!_.isString(action)){
+          debug(`BadRequest:action is not string! action:`,action)
           throw new BadRequestError()
         } // validate action
         try{
-          let {action, params} = data
           let meta = svc.getMeta(this)
           opts =  _.assign({meta},opts)
           let res = await svc.callAction(action, params, opts, whitelist)
@@ -71,7 +83,7 @@ module.exports = {
     },
     getMeta(socket){
       return {
-        user: socket.user
+        user: socket.client.user
       }
     },
     onError(err, respond){
@@ -83,6 +95,27 @@ module.exports = {
   started(){
     if(!this.io){
       throw new Error('No io object.')
+    }
+    for(let item of this.settings.routes){
+      let nsp = item.namespace || '/'
+      let eventName = item.socket.event
+      let namespace = this.io.of(nsp)
+      if(item.middlewares){ //Server middlewares
+        for(let middleware of item.middlewares){
+          namespace.use(middleware)
+        }
+      }
+
+      namespace.on('connection', socket=>{
+        this.logger.info(`[${nsp}]Client connected:`,socket.id)
+        if(item.socket.middlewares){ //socketmiddlewares
+          for(let middleware of item.socket.middlewares){
+            socket.use(middleware)
+          }
+        }
+        debug('Attach event:', eventName)
+        socket.on(eventName, this.handlers[nsp][eventName])
+      })
     }
     this.io.on('connection', client=>{
       this.logger.info('Client connected:', client.id)
