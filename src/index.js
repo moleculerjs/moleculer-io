@@ -8,45 +8,46 @@ const { BadRequestError } = require('./errors')
 module.exports = {
   name:'io',
   settings:{
-    // port: 3001,
+    port: 3000,
     // options: {}, //socket.io options
-    namespaces:{
-      '/': {
-        // middlewares: [],
+    routes:[
+      {
+        namespace: '/',
+        middlewares: [],
         socket: {
-          // middlewares: [],
-          events: {
-            call: {
-              // type: 'call', //default
+          middlewares: [],
+          handlers: [
+            {
+              event: 'call',
+              // type: 'call',
               // whitelist: [],
-              // callOptions: {}
+              callOptions:{}
             }
-          }
+          ]
         }
       }
-    }
+    ]
   },
   created(){
     this.handlers = {} //
-    for(let nsp in this.settings.namespaces){
-      let item = this.settings.namespaces[nsp]
-      this.logger.info('Add handler:', item)
-      if(!this.handlers[nsp]) this.handlers[nsp] = {}
-      let events = item.socket.events
-      for(let eventName in events){
-        switch (events[eventName].type || 'call') {
+    for(let item of this.settings.routes){
+      this.logger.info('Add route:', item)
+      if(!this.handlers[item.namespace]) this.handlers[item.namespace] = {}
+      let events = item.socket.handlers
+      for(let handlerItem of item.socket.handlers){
+        switch (handlerItem.type || 'call') {
           case 'call':
-            this.handlers[nsp][eventName] = this.makeHandler(
-              eventName,
-              events[eventName].whitelist,
-              events[eventName].callOptions,
+            this.handlers[item.namespace][handlerItem.event] = this.makeHandler(
+              handlerItem.event,
+              handlerItem.whitelist,
+              handlerItem.callOptions,
             )
             break;
           case 'login':
-            this.handlers[nsp][eventName] = this.makeLoginHandler(
-              eventName,
-              events[eventName].whitelist,
-              events[eventName].callOptions,
+            this.handlers[item.namespace][handlerItem.event] = this.makeLoginHandler(
+              handlerItem.event,
+              handlerItem.whitelist,
+              handlerItem.callOptions,
             )
             break
           default:
@@ -98,8 +99,7 @@ module.exports = {
         }
         try{
           let meta = svc.getMeta(this)
-          opts =  _.assign({meta},opts)
-          let res = await svc.callAction(action, params, opts, whitelist)
+          let res = await svc.callAction(action, params, _.assign({meta},opts), whitelist)
           if(_.isFunction(respond)) respond(null, res)
         }catch(err){
           debug('Call action error:',err)
@@ -110,14 +110,16 @@ module.exports = {
     makeLoginHandler:function(eventName, whitelist, opts){
       let handler = this.makeHandler(eventName, whitelist, opts)
       return async function(action, params, respond){
-        handler.call(this, action, params, (err, res)=>{
+        let socket = this
+        handler.call(socket, action, params, (err, res)=>{
           if(err) return respond(err)
-          this.client.user = res
+          socket.client.user = res
           respond(err,res)
         })
       }
     },
     getMeta(socket){
+      debug('getMeta', socket.client.user)
       return {
         user: socket.client.user
       }
@@ -132,25 +134,24 @@ module.exports = {
     if(!this.io){
       this.initServer()
     }
-    for(let nsp in this.settings.namespaces){
-      // let nsp = item.namespace || '/'
-      let item = this.settings.namespaces[nsp]
-      let namespace = this.io.of(nsp)
+    for(let item of this.settings.routes){
+      let namespace = this.io.of(item.namespace || '/')
       if(item.middlewares){ //Server middlewares
         for(let middleware of item.middlewares){
           namespace.use(middleware)
         }
       }
+      let handlers = this.handlers[item.namespace]
       namespace.on('connection', socket=>{
-        this.logger.info(`(nsp:'${nsp}') Client connected:`,socket.id)
+        this.logger.info(`(nsp:'${item.namespace}') Client connected:`,socket.id)
         if(item.socket.middlewares){ //socketmiddlewares
-          for(let middleware of this.handlers[nsp]){
+          for(let middleware of item.socket.middlewares){
             socket.use(middleware)
           }
         }
-        for(let eventName in item.socket.events){
+        for(let eventName in handlers){
           debug('Attach event:', eventName)
-          socket.on(eventName, this.handlers[nsp][eventName])
+          socket.on(eventName, handlers[eventName])
         }
       })
     }

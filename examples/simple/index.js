@@ -48,21 +48,25 @@ const ioService = broker.createService({
   name: 'io',
   mixins: [SocketIOService],
   settings:{
-    namespaces: {
-      '/': {
-        socket:{
-          events: {
-            call: {},
-            login: {
-              type: 'login',
-              whitelist: [
-                'accounts.login'
-              ]
-            }
-          }
-        }
-      }
-    }
+     routes:[
+       {
+         namespace: '/',
+         socket:{
+           handlers: [
+             {
+               event:'call'
+             },
+             {
+               event:'login',
+               type:'login',
+               whitelist: [
+                 'accounts.login'
+               ]
+             }
+           ]
+         }
+       }
+     ]
   }
 })
 

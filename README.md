@@ -52,7 +52,7 @@ broker.start()
 ```
 By default, `moleculer-io` handle the `call` event which will proxy to moleculer's `broker.call`
 Examples:
-- Call `test.hello` action: `socket.emit('call','test.hello', callback)`
+- Call `test.hello` action without params: `socket.emit('call','test.hello', callback)`
 - Call `math.add` action with params: `socket.emit('call','math.add', {a:25, b:13}, callback)`
 - Get health info of node: `socket.emit('call','$node.health', callback)`
 - List all actions: `socket.emit('call', '$node.list', callback)`
@@ -69,6 +69,36 @@ socket.emit('call','math.add',{a:123, b:456},function(err,res){
   }
 })
 ```
+
+## Handle multiple events
+You can create multiple routes with different whitelist, calling options & authorization.
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings: {
+    port: 3000,
+    routes:[
+      {
+        namespace: '/',
+        middlewares: [],
+        socket: {
+          middlewares: [],
+          handlers: [
+            {
+              event: 'call',
+              whitelist: [],
+              callOptions:{}
+            }
+          ]
+        }
+      }
+    ]
+  }
+})
+```
+
+
 ## Full settings
 ```javascript
 settings: {
@@ -94,6 +124,7 @@ settings: {
 
 
 # Change logs
+**0.4.0**: Modify settings format.
 
 **0.3.0**: Add login handler.
 

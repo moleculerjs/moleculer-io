@@ -10,6 +10,7 @@
 		<a href="https://github.com/tiaod/moleculer-io" target="_blank">Hello Moleculer IO</a>
 	</h1>
 	<button onclick="login()">login</button>
+	<button onclick="getUserInfo()">getUserInfo</button>
 	<button onclick="callMath()">Call `math.add` via websocket</button>
 	<div>
 		<pre id="res"></pre>
@@ -51,15 +52,17 @@
 					alert(JSON.stringify(err))
 				}else{
 					document.getElementById("res").textContent += 'Login success!' + '\n'
-					socket.emit('call', 'accounts.getUserInfo', function(err, res) {
-						if(err){
-							alert(JSON.stringify(err))
-						}else{
-							document.getElementById("res").textContent += 'Get user info:'+ JSON.stringify(res)+ '\n'
-						}
-						console.log()
-					})
 				}
+			})
+		}
+		function getUserInfo(){
+			socket.emit('call', 'accounts.getUserInfo', function(err, res) {
+				if(err){
+					alert(JSON.stringify(err))
+				}else{
+					document.getElementById("res").textContent += 'Get user info:'+ JSON.stringify(res)+ '\n'
+				}
+				console.log()
 			})
 		}
 	</script>
