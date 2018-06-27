@@ -9,7 +9,7 @@ module.exports = {
   name:'io',
   settings:{
     // port: 3001,
-    options: {}, //socket.io options
+    // options: {}, //socket.io options
     namespaces:{
       '/': {
         // middlewares: [],
@@ -17,6 +17,7 @@ module.exports = {
           // middlewares: [],
           events: {
             call: {
+              // type: 'call', //default
               // whitelist: [],
               // callOptions: {}
             }
@@ -33,11 +34,24 @@ module.exports = {
       if(!this.handlers[nsp]) this.handlers[nsp] = {}
       let events = item.socket.events
       for(let eventName in events){
-        this.handlers[nsp][eventName] = this.makeHandler(
-          eventName,
-          events[eventName].whitelist,
-          events[eventName].callOptions,
-        )
+        switch (events[eventName].type || 'call') {
+          case 'call':
+            this.handlers[nsp][eventName] = this.makeHandler(
+              eventName,
+              events[eventName].whitelist,
+              events[eventName].callOptions,
+            )
+            break;
+          case 'login':
+            this.handlers[nsp][eventName] = this.makeLoginHandler(
+              eventName,
+              events[eventName].whitelist,
+              events[eventName].callOptions,
+            )
+            break
+          default:
+            throw new Error(`Unknow handler type: ${events[eventName].type}`)
+        }
       }
     }
   },
@@ -73,11 +87,15 @@ module.exports = {
       debug('MakeHandler', eventName)
       const svc = this
       return async function(action, params, respond){
-        debug(`Handle ${eventName} event:`,action, params)
+        debug(`Handle ${eventName} event:`,action)
         if(!_.isString(action)){
           debug(`BadRequest:action is not string! action:`,action)
           throw new BadRequestError()
-        } // validate action
+        }
+        if(_.isFunction(params)){
+          respond = params
+          params = null
+        }
         try{
           let meta = svc.getMeta(this)
           opts =  _.assign({meta},opts)
@@ -87,6 +105,16 @@ module.exports = {
           debug('Call action error:',err)
           if(_.isFunction(respond)) svc.onError(err, respond)
         }
+      }
+    },
+    makeLoginHandler:function(eventName, whitelist, opts){
+      let handler = this.makeHandler(eventName, whitelist, opts)
+      return async function(action, params, respond){
+        handler.call(this, action, params, (err, res)=>{
+          if(err) return respond(err)
+          this.client.user = res
+          respond(err,res)
+        })
       }
     },
     getMeta(socket){

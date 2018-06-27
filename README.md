@@ -52,7 +52,7 @@ broker.start()
 ```
 By default, `moleculer-io` handle the `call` event which will proxy to moleculer's `broker.call`
 Examples:
-- Call `test.hello` action: `socket.emit('call','test.hello', null, callback)`
+- Call `test.hello` action: `socket.emit('call','test.hello', callback)`
 - Call `math.add` action with params: `socket.emit('call','math.add', {a:25, b:13}, callback)`
 - Get health info of node: `socket.emit('call','$node.health', callback)`
 - List all actions: `socket.emit('call', '$node.list', callback)`
@@ -94,5 +94,7 @@ settings: {
 
 
 # Change logs
+
+**0.3.0**: Add login handler.
 
 **0.2.0**: Add `initServer` method.
