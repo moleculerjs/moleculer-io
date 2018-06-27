@@ -12,6 +12,7 @@
 	<button onclick="login()">login</button>
 	<button onclick="getUserInfo()">getUserInfo</button>
 	<button onclick="callMath()">Call `math.add` via websocket</button>
+	<input type="file" name="file" id="fileToUpload" onchange="upload()">
 	<div>
 		<pre id="res"></pre>
 	</div>
@@ -63,6 +64,18 @@
 					document.getElementById("res").textContent += 'Get user info:'+ JSON.stringify(res)+ '\n'
 				}
 				console.log()
+			})
+		}
+		function upload(event){
+			let fileInput = document.getElementById('fileToUpload')
+			console.log(fileInput.files)
+			let file = fileInput.files[0]
+			socket.emit('upload', file, function(err, res){
+				if(err){
+					alert(JSON.stringify(err))
+				}else{
+					document.getElementById("res").textContent += 'File upload success!'+ JSON.stringify(res)+ '\n'
+				}
 			})
 		}
 	</script>

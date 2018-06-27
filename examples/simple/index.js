@@ -65,9 +65,9 @@ const ioService = broker.createService({
               'accounts.login'
             ]
           },
-          'upload':function(data, respond){
-            console.log(this)
-            respond(null, 'hello')
+          'upload':function(file, respond){
+            console.log(file)
+            respond(null, file)
           }
         }
       }
