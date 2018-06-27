@@ -132,6 +132,33 @@ broker.createService({
   }
 })
 ```
+## Custom handler
+```javascript
+broker.createService({
+  name:'io',
+  mixins: [SocketIOService],
+  settings: {
+    port:3000,
+    routes:[
+      {
+        namespace:'/',
+        middlewares: [],
+        socket:{
+          handlers:[
+            {
+              event:'call'
+            },
+            {
+              event:'upload',
+              handler
+            }
+          ]
+        }
+      }
+    ]
+  }
+})
+```
 
 ## Authorization
 You can implement authorization. For this you need to do 2 things.

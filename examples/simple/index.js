@@ -48,25 +48,30 @@ const ioService = broker.createService({
   name: 'io',
   mixins: [SocketIOService],
   settings:{
-     routes:[
-       {
-         namespace: '/',
-         socket:{
-           handlers: [
-             {
-               event:'call'
-             },
-             {
-               event:'login',
-               type:'login',
-               whitelist: [
-                 'accounts.login'
-               ]
-             }
-           ]
-         }
-       }
-     ]
+    namespaces: {
+      '/':{
+        // middlewares:[],
+        // packetMiddlewares:[],
+        events:{
+          'call':{
+            whitelist: [
+              'math.*'
+            ],
+            // callOptions:{}
+          },
+          'login':{
+            type:'login',
+            whitelist:[
+              'accounts.login'
+            ]
+          },
+          'upload':function(data, respond){
+            console.log(this)
+            respond(null, 'hello')
+          }
+        }
+      }
+    }
   }
 })
 
