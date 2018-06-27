@@ -155,12 +155,31 @@ module.exports = {
         }
       })
     }
-    // this.io.on('connection', client=>{
-    //   this.logger.info('Client connected:', client.id)
-    //   for(let event in this.routes){
-    //     debug('Attach event:', event)
-    //     client.on(event, this.routes[event]) //attach to socket
-    //   }
-    // })
+  },
+  actions: {
+    broadcast:{
+      params:{
+        event: { type:'string' },
+        namespace:{ type:'string', optional:true},
+        args: { type:'array',optional:true},
+        volatile: { type: 'boolean',optional:true},
+        local: { type:'boolean',optional:true},
+        rooms: { type:'arrary', items: 'string',optional:true}
+      },
+      async handler(ctx){
+        let namespace = this.io
+        if(ctx.params.namespace){
+          namespace = namespace.of(ctx.params.namespace)
+        }
+        if(ctx.params.volate) namespace = namespace.volate
+        if(ctx.params.local) namespace = namespace.local
+        if(ctx.params.rooms){
+          for(let room of ctx.params.rooms){
+            namespace = namespace.to(room)
+          }
+        }
+        namespace.emit(event,...ctx.params.args)
+      }
+    }
   }
 }

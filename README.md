@@ -17,6 +17,41 @@ $ npm install moleculer-io
 ```
 
 # Usage
+## Init server
+Using with Node http server:
+```javascript
+const server = require('http').Server(app)
+const ioService = broker.createService({
+  name: 'io',
+  mixins: [SocketIOService]
+})
+
+ioService.initServer(server)
+// Once the initServer() was called, you can access the io object from ioService.io
+broker.start()
+server.listen(3000)
+
+```
+Or let moleculer-io create a server for you:
+```javascript
+const ioService = broker.createService({
+  name: 'io',
+  mixins: [SocketIOService]
+})
+ioService.initServer(3000)
+broker.start()
+```
+More simple:
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings:{
+    port:3000 //will call initServer() on broker.start()
+  }
+})
+broker.start()
+```
 
 ## Handle socket events
 Server:
@@ -277,12 +312,22 @@ settings: {
 }
 ```
 
-## Brocasting
-TODO
-
+## Broadcast
+If you want to broadcast event to socket.io from moleculer service:
+```javascript
+broker.call('io.broadcast', {
+  event:'hello',
+  args: ['my', 'friends','!'],
+  volatile: true,
+  local: true,
+  rooms: ['room1', 'room2']
+})
+```
 
 
 # Change logs
+**0.5.0**: Add broadcast to socket.io rooms
+
 **0.4.0**: Modify settings format.
 
 **0.3.0**: Add login handler.
