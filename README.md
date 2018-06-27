@@ -98,28 +98,187 @@ broker.createService({
 })
 ```
 
+## Authorization
+You can implement authorization. For this you need to do 2 things.
+1. Add `login` type handler
+2. Define your login action in Moleculer
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings:{
+     routes:[
+       {
+         namespace: '/',
+         socket:{
+           handlers: [
+             {
+               event:'call'
+             },
+             {
+               event:'login',
+               type:'login', //define a login type handler
+               whitelist: [
+                 'accounts.login'
+               ]
+             }
+           ]
+         }
+       }
+     ]
+  }
+})
+
+broker.createService({
+  name: 'accounts',
+  actions: {
+    login(ctx){
+      if(ctx.params.user == 'tiaod' && ctx.params.password == 'pass'){
+        return {id:'tiaod'} // This will set to socket.client.user
+      }
+    },
+    getUserInfo(ctx){
+      return ctx.meta.user
+    }
+  }
+})
+```
+
+Client:
+```javascript
+socket.emit('login', 'accounts.login', {user: 'tiaod', password: 'pass'}, function(err,res){
+  if(err){
+    alert(JSON.stringify(err))
+  }else{
+    console.log('Login success!')
+  }
+})
+```
+See `examples/simple`
+
+Also you could overwrite the getMeta method to add more addition meta info. The default getMeta method is:
+```javascript
+getMeta(socket){
+  return {
+    user: socket.client.user
+  }
+}
+```
+Example to add more additional info:
+```javascript
+broker.createService({
+  name:'io',
+  mixins: [SocketIOService],
+  methods:{
+    getMeta(socket){ //construct the meta object.
+      return {
+        user: socket.authToken,
+        socketId: socket.id
+      }
+    }
+  }
+})
+```
+## Middlewares
+Register middlewares
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings:{
+     routes:[
+       {
+         namespace: '/'
+         middlewares: [ //Namespace level middlewares, equipment to namespace.use()
+           (socket, next) => {
+              if (socket.request.headers.cookie) return next();
+              next(new Error('Authentication error'));
+            }
+         ],
+         socket:{
+           middlewares:[ // Socket level middlewares, equipment to socket.use()
+             (packet, next) => {
+                if (packet.doge === true) return next();
+                next(new Error('Not a doge error'));
+              }
+           ],
+           handlers: [
+             {
+               event:'call'
+             }
+           ]
+         }
+       }
+     ]
+  }
+})
+```
+
+
+## Calling options
+The handler has a callOptions property which is passed to broker.call. So you can set timeout, retryCount or fallbackResponse options for routes.
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings:{
+     routes:[
+       {
+         namespace: '/',
+         socket:{
+           handlers: [
+             {
+               event:'call'
+               callOptions: {
+                 timeout: 500,
+                 retryCount: 0,
+                 fallbackResponse(ctx, err) { ... }
+               }
+             },
+           ]
+         }
+       }
+     ]
+  }
+})
+```
+Note: If you provie a meta field here, it replace the getMeta method's result.
+
+
 
 ## Full settings
 ```javascript
 settings: {
-  options: {}, // Socket.io options
+  options: {}, // Socket.io options. See: https://socket.io/docs/server-api/#new-server-httpserver-options
   port: 3000, // If provied, moleculer-io will create a server to listen this port.
-  namespaces:{
-    '/': { //namespace
-      middlewares: [], //server middlewares
+  routes:[
+    {
+      namespace: '/',
+      middlewares: [], //namespace middlewares
       socket: {
-        middlewares: [], //socket middlewares
-        events: {
-          'call': { //eventName
-            whitelist: [], //action whitelists
-            callOptions: {} //call options
+        middlewares: [], // socket middlewares
+        handlers: [
+          {
+            event: 'call',
+            type: 'call', // handler type. Support: 'call', 'login'
+            whitelist: [],
+            callOptions:{} // Call options pass to broker.call()
+          },
+          {
+            event: 'login',
+            type: 'login',
+            whitelist: [],
+            callOptions:{}
           }
-        }
+        ]
       }
     }
-  }
+  ]
 }
 ```
+
+## Brocasting
+TODO
 
 
 
