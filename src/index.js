@@ -8,20 +8,20 @@ const { BadRequestError } = require('./errors')
 module.exports = {
   name:'io',
   settings:{
-    port: 3000,
+    // port: 3000,
     // options: {}, //socket.io options
     routes:[
       {
         namespace: '/',
-        middlewares: [],
+        // middlewares: [],
         socket: {
-          middlewares: [],
+          // middlewares: [],
           handlers: [
             {
               event: 'call',
               // type: 'call',
               // whitelist: [],
-              callOptions:{}
+              // callOptions:{}
             }
           ]
         }
