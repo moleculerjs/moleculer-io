@@ -157,7 +157,7 @@ broker.createService({
 })
 ```
 
-## Event hooks
+## Handler hooks
 The event handler has before & after call hooks. You can use it to set ctx.meta, access socket object or modify the response data.
 ```javascript
 broker.createService({
@@ -171,11 +171,11 @@ broker.createService({
             whitelist: [
               'math.*'
             ],
-            before: async function(ctx, socket, args){
+            before: async function(ctx, socket, args){ //before hook
               //args: An object includes { action, params, callOptions }
               console.log('before hook:', args)
             },
-            after:async function(ctx, socket, res){
+            after:async function(ctx, socket, res){ //after hook
               console.log('after hook', res)
               // res: The respose data.
             }
@@ -218,7 +218,7 @@ broker.createService({
       }
     },
     getUserInfo(ctx){
-      return ctx.meta.$user //Once user was login, you can get user here.
+      return ctx.meta.$user //Once user was logged in, you can get user here.
     }
   }
 })
@@ -318,6 +318,49 @@ broker.createService({
 Note: If you provie a meta field here, it replace the getMeta method's result.
 
 
+## Join and leave rooms
+Just set ctx.meta.$join or ctx.meta.$leave to the rooms you want to join or leave.
+
+eg.
+```javascript
+ctx.meta.$join = 'room1' //Join room1
+ctx.meta.$join = ['room1', 'room2'] // Join room1 and room2
+
+ctx.meta.$leave = 'room1' //Leave room1
+ctx.meta.$leave = ['room1', 'room2'] // Leave room1 and room2
+```
+
+Example service:
+```javascript
+broker.createService({
+  name: 'rooms',
+  actions: {
+    join(ctx){
+      ctx.meta.$join = ctx.params.join
+    },
+    leave(ctx){
+      ctx.meta.$leave = ctx.params.leave
+    },
+    get(ctx){
+      return ctx.meta.$rooms
+    }
+  }
+})
+```
+
+
+## Broadcast
+If you want to broadcast event to socket.io from moleculer service:
+```javascript
+broker.call('io.broadcast', {
+  namespace:'/', //optional
+  event:'hello',
+  args: ['my', 'friends','!'], //optional
+  volatile: true, //optional
+  local: true, //optional
+  rooms: ['room1', 'room2'] //optional
+})
+```
 
 ## Full settings
 ```javascript
@@ -339,19 +382,6 @@ settings:{
     }
   }
 }
-```
-
-## Broadcast
-If you want to broadcast event to socket.io from moleculer service:
-```javascript
-broker.call('io.broadcast', {
-  namespace:'/', //optional
-  event:'hello',
-  args: ['my', 'friends','!'], //optional
-  volatile: true, //optional
-  local: true, //optional
-  rooms: ['room1', 'room2'] //optional
-})
 ```
 
 
