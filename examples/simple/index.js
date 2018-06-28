@@ -35,11 +35,26 @@ broker.createService({
   actions: {
     login(ctx){
       if(ctx.params.user == 'tiaod' && ctx.params.password == 'pass'){
-        return {id:'tiaod'}
+        ctx.meta.$user = {id:'tiaod'}
       }
     },
     getUserInfo(ctx){
-      return ctx.meta.user
+      return ctx.meta.$user
+    }
+  }
+})
+
+broker.createService({
+  name: 'rooms',
+  actions: {
+    join(ctx){
+      ctx.meta.$join = ctx.params.join
+    },
+    leave(ctx){
+      ctx.meta.$leave = ctx.params.leave
+    },
+    get(ctx){
+      return ctx.meta.$rooms
     }
   }
 })
@@ -55,15 +70,17 @@ const ioService = broker.createService({
         events:{
           'call':{
             whitelist: [
-              'math.*'
+              'math.*',
+              'accounts.*',
+              'rooms.*'
             ],
+            before: async function(ctx, socket, args){
+              console.log('before hook:', args)
+            },
+            after:async function(ctx, socket, res){
+              console.log('after hook', res)
+            }
             // callOptions:{}
-          },
-          'login':{
-            type:'login',
-            whitelist:[
-              'accounts.login'
-            ]
           },
           'upload':function(file, respond){
             console.log(file)

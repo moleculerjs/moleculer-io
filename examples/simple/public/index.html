@@ -13,6 +13,9 @@
 	<button onclick="getUserInfo()">getUserInfo</button>
 	<button onclick="callMath()">Call `math.add` via websocket</button>
 	<input type="file" name="file" id="fileToUpload" onchange="upload()">
+	<button onclick="getRooms()">Get rooms</button>
+	<button onclick="joinRoom()">Join room "testRoom"</button>
+	<button onclick="leaveRoom()">Leave room "testRoom"</button>
 	<div>
 		<pre id="res"></pre>
 	</div>
@@ -48,7 +51,7 @@
 			});
 		}
 		function login(){
-			socket.emit('login', 'accounts.login', {user: 'tiaod', password: 'pass'}, function(err,res){
+			socket.emit('call', 'accounts.login', {user: 'tiaod', password: 'pass'}, function(err,res){
 				if(err){
 					alert(JSON.stringify(err))
 				}else{
@@ -66,7 +69,7 @@
 				console.log()
 			})
 		}
-		function upload(event){
+		function upload(){
 			let fileInput = document.getElementById('fileToUpload')
 			console.log(fileInput.files)
 			let file = fileInput.files[0]
@@ -75,6 +78,33 @@
 					alert(JSON.stringify(err))
 				}else{
 					document.getElementById("res").textContent += 'File upload success!'+ JSON.stringify(res)+ '\n'
+				}
+			})
+		}
+		function joinRoom(){
+			socket.emit('call', 'rooms.join', {join:'testRoom'}, function(err, res){
+				if(err){
+					alert(JSON.stringify(err))
+				}else{
+					document.getElementById("res").textContent += 'Join room success'+ '\n'
+				}
+			})
+		}
+		function leaveRoom(){
+			socket.emit('call', 'rooms.leave', {leave:'testRoom'}, function(err, res){
+				if(err){
+					alert(JSON.stringify(err))
+				}else{
+					document.getElementById("res").textContent += 'Leave room success'+ '\n'
+				}
+			})
+		}
+		function getRooms(){
+			socket.emit('call', 'rooms.get', function(err, res){
+				if(err){
+					alert(JSON.stringify(err))
+				}else{
+					document.getElementById("res").textContent += 'Current rooms '+ JSON.stringify(res) + '\n'
 				}
 			})
 		}
