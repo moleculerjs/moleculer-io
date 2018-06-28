@@ -10,6 +10,8 @@ An API Gateway service for Moleculer framework using Socket.io
 - Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.user`)
 - Whitelist.
 - Middlewares.
+- Broadcast events.
+- Join and leave rooms.
 
 # Install
 ```shell
