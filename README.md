@@ -115,7 +115,7 @@ broker.createService({
   mixins: [SocketIOService],
   settings: {
     port: 3000,
-    namaspaces: {
+    namespaces: {
       '/':{
         events: {
           'call':{
