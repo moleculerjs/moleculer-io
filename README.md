@@ -11,7 +11,7 @@ An API Gateway service for Moleculer framework using Socket.io
 - Whitelist.
 - Middlewares.
 - Broadcast events.
-- Join and leave rooms.
+- Joining and leaving rooms.
 
 # Install
 ```shell
@@ -263,6 +263,31 @@ broker.createService({
   }
 })
 ```
+## Calling options
+The handler has a callOptions property which is passed to broker.call. So you can set timeout, retryCount or fallbackResponse options for routes.
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings:{
+    namespaces:{
+      '/':{
+        events:{
+          'call':{
+            callOptions:{
+              timeout: 500,
+              retryCount: 0,
+              fallbackResponse(ctx, err) { ... }
+            }
+          }
+        }
+      }
+    }
+  }
+})
+```
+Note: If you provie a meta field here, it replace the getMeta method's result.
+
 ## Middlewares
 Register middlewares. Both namespace middlewares and packet middlewares are supported.
 ```javascript
@@ -294,33 +319,9 @@ broker.createService({
 ```
 
 
-## Calling options
-The handler has a callOptions property which is passed to broker.call. So you can set timeout, retryCount or fallbackResponse options for routes.
-```javascript
-broker.createService({
-  name: 'io',
-  mixins: [SocketIOService],
-  settings:{
-    namespaces:{
-      '/':{
-        events:{
-          'call':{
-            callOptions:{
-              timeout: 500,
-              retryCount: 0,
-              fallbackResponse(ctx, err) { ... }
-            }
-          }
-        }
-      }
-    }
-  }
-})
-```
-Note: If you provie a meta field here, it replace the getMeta method's result.
 
 
-## Join and leave rooms
+## Joining and leaving rooms
 Just set ctx.meta.$join or ctx.meta.$leave to the rooms you want to join or leave.
 
 eg.
