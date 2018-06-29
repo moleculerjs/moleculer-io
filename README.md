@@ -7,7 +7,7 @@ An API Gateway service for Moleculer framework using Socket.io
 
 # Features
 - Call moleculer actions by emiting Socket.io events.
-- Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.user`)
+- Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.$user`)
 - Whitelist.
 - Middlewares.
 - Broadcast events.
@@ -88,6 +88,7 @@ const ioService = broker.createService({
 broker.start()
 ```
 By default, `moleculer-io` handle the `call` event which will proxy to moleculer's `broker.call`
+
 Examples:
 - Call `test.hello` action without params: `socket.emit('call','test.hello', callback)`
 - Call `math.add` action with params: `socket.emit('call','math.add', {a:25, b:13}, callback)`
@@ -255,7 +256,7 @@ broker.createService({
   methods:{
     getMeta(socket){ //construct the meta object.
       return {
-        $user: socket.authToken,
+        $user: socket.client.user,
         $rooms: Object.keys(socket.rooms),
         socketId: socket.id
       }
@@ -303,7 +304,7 @@ broker.createService({
              next(new Error('Authentication error'));
            }
         ],
-        packetMiddlewares: [
+        packetMiddlewares: [ // equipment to socket.use()
           (packet, next) => {
              if (packet.doge === true) return next();
              next(new Error('Not a doge error'));
@@ -322,7 +323,7 @@ broker.createService({
 
 
 ## Joining and leaving rooms
-Just set ctx.meta.$join or ctx.meta.$leave to the rooms you want to join or leave.
+In your action, set ctx.meta.$join or ctx.meta.$leave to the rooms you want to join or leave.
 
 eg.
 ```javascript
@@ -332,19 +333,20 @@ ctx.meta.$join = ['room1', 'room2'] // Join room1 and room2
 ctx.meta.$leave = 'room1' //Leave room1
 ctx.meta.$leave = ['room1', 'room2'] // Leave room1 and room2
 ```
+After the action finished, `moleculer-io` will join or leave the room you specified.
 
-Example service:
+Example room management service:
 ```javascript
 broker.createService({
   name: 'rooms',
   actions: {
     join(ctx){
-      ctx.meta.$join = ctx.params.join
+      ctx.meta.$join = ctx.params.room
     },
     leave(ctx){
-      ctx.meta.$leave = ctx.params.leave
+      ctx.meta.$leave = ctx.params.room
     },
-    get(ctx){
+    list(ctx){
       return ctx.meta.$rooms
     }
   }
