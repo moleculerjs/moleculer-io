@@ -391,6 +391,8 @@ settings:{
 
 
 # Change logs
+**0.8.1**: Fix io.broadcast error.
+
 **0.8.0**: Add ctx.meta.$rooms, and ctx.meta.$join ctx.meta.$leave
 
 **0.7.0**: Add hooks.

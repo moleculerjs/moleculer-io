@@ -1,6 +1,6 @@
 {
   "name": "moleculer-io",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "An API GateWay service for moleculerjs using socket.io",
   "main": "lib/index.js",
   "directories": {
@@ -19,7 +19,8 @@
   "keywords": [
     "socket.io",
     "moleculer",
-    "microservice"
+    "microservice",
+    "API Gateway"
   ],
   "author": "tiaod",
   "license": "MIT",

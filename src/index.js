@@ -221,6 +221,7 @@ module.exports = {
         rooms: { type:'array', items: 'string',optional:true}
       },
       async handler(ctx){
+        debug('brocast: ', ctx.params)
         let namespace = this.io
         if(ctx.params.namespace){
           namespace = namespace.of(ctx.params.namespace)
@@ -232,7 +233,7 @@ module.exports = {
             namespace = namespace.to(room)
           }
         }
-        namespace.emit(event,...ctx.params.args)
+        namespace.emit(ctx.params.event,...ctx.params.args)
       }
     }
   }
