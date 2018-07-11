@@ -165,7 +165,7 @@ module.exports = {
         }
         if(handlerItem.whitelist && !this.checkWhitelist(action, handlerItem.whitelist)){
           debug(`Service "${action}" not found`)
-          throw new ServiceNotFoundError(action)
+          throw new ServiceNotFoundError({action})
         }
         let meta = this.getMeta(socket)
         opts = _.assign({meta},opts)
