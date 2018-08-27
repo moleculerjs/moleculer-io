@@ -391,6 +391,8 @@ settings:{
 
 
 # Change logs
+**0.10.0**: Add action visibility support. See [Action visibility](https://moleculer.services/docs/0.13/actions.html#Action-visibility)
+
 **0.9.1**: Fix `ServiceNotFoundError` message.
 
 **0.9.0**: Upgrade to `moleculer@0.13`, no breaking changes.

@@ -167,6 +167,14 @@ module.exports = {
           debug(`Service "${action}" not found`)
           throw new ServiceNotFoundError({action})
         }
+        const endpoint = this.broker.findNextActionEndpoint(action)
+        if (endpoint instanceof Error)
+					throw endpoint
+        // Check endpoint visibility
+        if (endpoint.action.visibility != null && endpoint.action.visibility != "published") {
+					// Action can't be published
+					throw new ServiceNotFoundError({ action });
+				}
         let meta = this.getMeta(socket)
         opts = _.assign({meta},opts)
         debug('Call action:', action, params, opts)

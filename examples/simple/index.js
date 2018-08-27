@@ -21,9 +21,12 @@ const broker = new ServiceBroker({
 broker.createService({
 	name: "math",
 	actions: {
-		add(ctx) {
-			return Number(ctx.params.a) + Number(ctx.params.b);
-		},
+    add:{
+      visibility: "published",
+      handler(ctx) {
+  			return Number(ctx.params.a) + Number(ctx.params.b);
+  		},
+    },
 		sub(ctx) {
 			return Number(ctx.params.a) - Number(ctx.params.b);
 		}
