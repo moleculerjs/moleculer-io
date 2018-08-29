@@ -1,11 +1,9 @@
 ![LOGO](https://camo.githubusercontent.com/22a347b6cc07f98ce0ee06be66385a4cb967d4a7/687474703a2f2f6d6f6c6563756c65722e73657276696365732f696d616765732f62616e6e65722e706e67)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tiaod/moleculer-io/master/LICENSE)
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
-# moleculer-io
-An API Gateway service for Moleculer framework using Socket.io
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [moleculer-io](#moleculer-io)
+- [Moleculer-io](#moleculer-io)
 - [Features](#features)
 - [Install](#install)
 - [Usage](#usage)
@@ -22,8 +20,13 @@ An API Gateway service for Moleculer framework using Socket.io
 	- [Broadcast](#broadcast)
 	- [Full settings](#full-settings)
 - [Change logs](#change-logs)
+- [License](#license)
 
 <!-- /TOC -->
+
+# Moleculer-io
+An API Gateway service for Moleculer framework using Socket.io
+
 
 # Features
 - Call moleculer actions by emiting Socket.io events.
@@ -466,3 +469,6 @@ settings:{
 **0.3.0**: Add login handler.
 
 **0.2.0**: Add `initServer` method.
+
+# License
+Moleculer-io is available under the MIT license.
