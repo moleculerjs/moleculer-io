@@ -3,7 +3,27 @@
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 # moleculer-io
 An API Gateway service for Moleculer framework using Socket.io
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
+- [moleculer-io](#moleculer-io)
+- [Features](#features)
+- [Install](#install)
+- [Usage](#usage)
+	- [Init server](#init-server)
+	- [Handle socket events](#handle-socket-events)
+	- [Handle multiple events](#handle-multiple-events)
+	- [Custom handler](#custom-handler)
+	- [Handler hooks](#handler-hooks)
+	- [Calling options](#calling-options)
+	- [Middlewares](#middlewares)
+	- [Authorization](#authorization)
+		- [Make authorization on connection](#make-authorization-on-connection)
+	- [Joining and leaving rooms](#joining-and-leaving-rooms)
+	- [Broadcast](#broadcast)
+	- [Full settings](#full-settings)
+- [Change logs](#change-logs)
+
+<!-- /TOC -->
 
 # Features
 - Call moleculer actions by emiting Socket.io events.
@@ -190,6 +210,61 @@ broker.createService({
 })
 ```
 
+## Calling options
+The handler has a callOptions property which is passed to broker.call. So you can set timeout, retryCount or fallbackResponse options for routes.
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings:{
+    namespaces:{
+      '/':{
+        events:{
+          'call':{
+            callOptions:{
+              timeout: 500,
+              retryCount: 0,
+              fallbackResponse(ctx, err) { ... }
+            }
+          }
+        }
+      }
+    }
+  }
+})
+```
+Note: If you provie a meta field here, it replace the getMeta method's result.
+
+## Middlewares
+Register middlewares. Both namespace middlewares and packet middlewares are supported.
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings:{
+    namespaces: {
+      '/': {
+        middlewares:[ //Namespace level middlewares, equipment to namespace.use()
+          (socket, next) => {
+             if (socket.request.headers.cookie) return next();
+             next(new Error('Authentication error'));
+           }
+        ],
+        packetMiddlewares: [ // equipment to socket.use()
+          (packet, next) => {
+             if (packet.doge === true) return next();
+             next(new Error('Not a doge error'));
+           }
+        ],
+        events:{
+          'call': {}
+        }
+      }
+    }
+  }
+})
+```
+
 ## Authorization
 You can implement authorization. For this you need to add an handler.
 ```javascript
@@ -264,55 +339,34 @@ broker.createService({
   }
 })
 ```
-## Calling options
-The handler has a callOptions property which is passed to broker.call. So you can set timeout, retryCount or fallbackResponse options for routes.
-```javascript
-broker.createService({
-  name: 'io',
-  mixins: [SocketIOService],
-  settings:{
-    namespaces:{
-      '/':{
-        events:{
-          'call':{
-            callOptions:{
-              timeout: 500,
-              retryCount: 0,
-              fallbackResponse(ctx, err) { ... }
-            }
-          }
-        }
-      }
-    }
-  }
-})
-```
-Note: If you provie a meta field here, it replace the getMeta method's result.
 
-## Middlewares
-Register middlewares. Both namespace middlewares and packet middlewares are supported.
+### Make authorization on connection
+If you don't want to emit an event to login, you can use query to pass your token:
 ```javascript
 broker.createService({
   name: 'io',
   mixins: [SocketIOService],
-  settings:{
+  settings: {
     namespaces: {
       '/': {
-        middlewares:[ //Namespace level middlewares, equipment to namespace.use()
-          (socket, next) => {
-             if (socket.request.headers.cookie) return next();
-             next(new Error('Authentication error'));
-           }
-        ],
-        packetMiddlewares: [ // equipment to socket.use()
-          (packet, next) => {
-             if (packet.doge === true) return next();
-             next(new Error('Not a doge error'));
-           }
-        ],
-        events:{
-          'call': {}
-        }
+        middlewares: [
+          async (socket, next) => {
+            if (socket.handshake.query.token) {
+              let token = socket.handshake.query.token
+              try {
+                let user = await broker.call("users.resolveToken", {
+                  token
+                })
+              } catch (err) {
+                return next(new Error('Authentication error'));
+              }
+              this.logger.info("Authenticated via JWT: ", user.username);
+              // Reduce user fields (it will be transferred to other nodes)
+              socket.client.user = _.pick(user, ["_id", "username", "email", "image"]);
+            }
+            next()
+          }
+        ]
       }
     }
   }
