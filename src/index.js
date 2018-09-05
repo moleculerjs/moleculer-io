@@ -136,7 +136,7 @@ module.exports = {
       let namespace = this.io.of(nsp)
       if(item.middlewares){ //Server middlewares
         for(let middleware of item.middlewares){
-          namespace.use(middleware)
+          namespace.use(middleware.bind(this))
         }
       }
       let handlers = this.handlers[nsp]
@@ -144,7 +144,7 @@ module.exports = {
         this.logger.info(`(nsp:'${nsp}') Client connected:`,socket.id)
         if(item.packetMiddlewares){ //socketmiddlewares
           for(let middleware of item.packetMiddlewares){
-            socket.use(middleware)
+            socket.use(middleware.bind(this))
           }
         }
         for(let eventName in handlers){

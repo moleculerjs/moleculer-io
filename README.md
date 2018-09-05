@@ -247,13 +247,13 @@ broker.createService({
     namespaces: {
       '/': {
         middlewares:[ //Namespace level middlewares, equipment to namespace.use()
-          (socket, next) => {
+          function(socket, next) {
              if (socket.request.headers.cookie) return next();
              next(new Error('Authentication error'));
            }
         ],
         packetMiddlewares: [ // equipment to socket.use()
-          (packet, next) => {
+          function(packet, next) {
              if (packet.doge === true) return next();
              next(new Error('Not a doge error'));
            }
@@ -266,6 +266,7 @@ broker.createService({
   }
 })
 ```
+**Note:** In middlewares the `this` is always pointed to the Service instance.
 
 ## Authorization
 You can implement authorization. For this you need to add an handler.
@@ -447,6 +448,8 @@ settings:{
 
 
 # Change logs
+**0.11.0**: Bind middlewares context to service instance.
+
 **0.10.0**: Add action visibility support. See [Action visibility](https://moleculer.services/docs/0.13/actions.html#Action-visibility)
 
 **0.9.1**: Fix `ServiceNotFoundError` message.

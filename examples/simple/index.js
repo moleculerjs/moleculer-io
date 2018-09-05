@@ -68,7 +68,10 @@ const ioService = broker.createService({
   settings:{
     namespaces: {
       '/':{
-        // middlewares:[],
+        middlewares:[function(socket, next){
+          //console.log(this) //point to service instance.
+          next()
+        }],
         // packetMiddlewares:[],
         events:{
           'call':{
