@@ -38,11 +38,11 @@ broker.createService({
   actions: {
     login(ctx){
       if(ctx.params.user == 'tiaod' && ctx.params.password == 'pass'){
-        ctx.meta.$user = {id:'tiaod'}
+        ctx.meta.user = {id:'tiaod'}
       }
     },
     getUserInfo(ctx){
-      return ctx.meta.$user
+      return ctx.meta.user
     }
   }
 })

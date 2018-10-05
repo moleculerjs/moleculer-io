@@ -29,7 +29,7 @@ The `moleculer-io` is the API gateway service for [Moleculer](https://github.com
 
 # Features
 - Call moleculer actions by emiting Socket.io events.
-- Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.$user`)
+- Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.user`)
 - Whitelist.
 - Middlewares.
 - Broadcast events.
@@ -295,11 +295,11 @@ broker.createService({
   actions: {
     login(ctx){
       if(ctx.params.user == 'tiaod' && ctx.params.password == 'pass'){
-        ctx.meta.$user = {id:'tiaod'} // This will save to socket.client.user
+        ctx.meta.user = {id:'tiaod'} // This will save to socket.client.user
       }
     },
     getUserInfo(ctx){
-      return ctx.meta.$user //Once user was logged in, you can get user here.
+      return ctx.meta.user //Once user was logged in, you can get user here.
     }
   }
 })
@@ -321,7 +321,7 @@ Also you could overwrite the getMeta method to add more addition meta info. The 
 ```javascript
 getMeta(socket){
   return {
-    $user: socket.client.user,
+    user: socket.client.user,
     $rooms: Object.keys(socket.rooms)
   }
 }
@@ -334,13 +334,21 @@ broker.createService({
   methods:{
     getMeta(socket){ //construct the meta object.
       return {
-        $user: socket.client.user,
+        user: socket.client.user,
         $rooms: Object.keys(socket.rooms),
         socketId: socket.id
       }
     }
   }
 })
+```
+
+By default, `ctx.meta.user` will save to `socket.client.user`, you can also overwrite it.
+The default `saveUser` method is: 
+```javascript
+saveUser(socket,ctx){
+	socket.client.user = ctx.meta.user
+}
 ```
 
 ### Make authorization on connection
@@ -448,6 +456,8 @@ settings:{
 
 
 # Change logs
+**0.12.0**: Change `ctx.meta.$user` to `ctx.meta.user`, add `saveUser` method.
+
 **0.11.0**: Bind middlewares context to service instance.
 
 **0.10.0**: Add action visibility support. See [Action visibility](https://moleculer.services/docs/0.13/actions.html#Action-visibility)

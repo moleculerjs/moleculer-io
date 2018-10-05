@@ -91,11 +91,14 @@ module.exports = {
     },
     getMeta(socket){
       let meta = {
-        $user: socket.client.user,
+        user: socket.client.user,
         $rooms: Object.keys(socket.rooms)
       }
       debug('getMeta', meta)
       return meta
+    },
+    saveUser(socket,ctx){
+      socket.client.user = ctx.meta.user
     },
     onError(err, respond){
       debug('onError',err)
@@ -188,7 +191,7 @@ module.exports = {
         if(handlerItem.after){
           await handlerItem.after.call(this, ctx, socket, res)
         }
-        socket.client.user = ctx.meta.$user
+        this.saveUser(socket,ctx)
         if(ctx.meta.$join){
           await this.joinRooms(socket, ctx.meta.$join)
         }
