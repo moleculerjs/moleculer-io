@@ -73,11 +73,12 @@
 			let fileInput = document.getElementById('fileToUpload')
 			console.log(fileInput.files)
 			let file = fileInput.files[0]
-			socket.emit('upload', file, function(err, res){
+			socket.emit('upload', {name: file.name, type: file.type }, file, function(err, res){
 				if(err){
 					alert(JSON.stringify(err))
 				}else{
 					document.getElementById("res").textContent += 'File upload success!'+ JSON.stringify(res)+ '\n'
+					console.log('response file:', res)
 				}
 			})
 		}

@@ -344,7 +344,7 @@ broker.createService({
 ```
 
 By default, `ctx.meta.user` will save to `socket.client.user`, you can also overwrite it.
-The default `saveUser` method is: 
+The default `saveUser` method is:
 ```javascript
 saveUser(socket,ctx){
 	socket.client.user = ctx.meta.user
@@ -456,6 +456,8 @@ settings:{
 
 
 # Change logs
+**0.12.1**: CustomHandler context now bind to the service instance.
+
 **0.12.0**: Change `ctx.meta.$user` to `ctx.meta.user`, add `saveUser` method.
 
 **0.11.0**: Bind middlewares context to service instance.

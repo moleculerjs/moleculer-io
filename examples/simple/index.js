@@ -2,8 +2,9 @@ const IO = require('socket.io')
 const { ServiceBroker } = require('moleculer')
 const SocketIOService = require('../../')
 const express = require('express')
-
-
+const fs = require('fs')
+const path = require('path')
+const Duplex = require('stream').Duplex;
 const app = express()
 
 app.get('/', function (req, res) {
@@ -62,6 +63,27 @@ broker.createService({
   }
 })
 
+broker.createService({
+  name: 'file',
+  actions: {
+    save: {
+			handler(ctx) {
+				return new this.Promise((resolve, reject) => {
+					const filePath = path.join(__dirname, ctx.meta.filename);
+					const f = fs.createWriteStream(filePath);
+					f.on("close", () => {
+						this.logger.info(`Uploaded file stored in '${filePath}'`);
+						resolve(filePath);
+					});
+					f.on("error", err => reject(err));
+
+					ctx.params.pipe(f);
+				});
+			}
+		}
+  }
+})
+
 const ioService = broker.createService({
   name: 'io',
   mixins: [SocketIOService],
@@ -88,10 +110,15 @@ const ioService = broker.createService({
             }
             // callOptions:{}
           },
-          'upload':function(file, respond){
-            console.log(file)
+          'upload':async function({name, type}, file, respond){
+            let stream = new Duplex()
+            stream.push(file)
+            stream.push(null)
+            await this.broker.call('file.save', stream, { meta: {
+              filename: name
+            }})
             respond(null, file)
-          }
+          },
         }
       }
     }

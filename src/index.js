@@ -1,9 +1,8 @@
 const IO = require('socket.io')
 const debug = require('debug')('moleculer-io')
 const _ = require('lodash')
-const nanomatch = require('nanomatch')
+const { match } = require("moleculer").Utils;
 const { ServiceNotFoundError } = require("moleculer").Errors;
-const { Context } = require('moleculer')
 const { BadRequestError } = require('./errors')
 
 module.exports = {
@@ -41,7 +40,7 @@ module.exports = {
       for(let event in events){
         let handlerItem = events[event]
         if(typeof handlerItem === 'function'){ //custom handler
-          this.handlers[nsp][event] = handlerItem
+          this.handlers[nsp][event] = handlerItem.bind(this)
           return
         }
         this.handlers[nsp][event] = this.makeHandler(handlerItem)
@@ -61,14 +60,13 @@ module.exports = {
     checkWhitelist(action, whitelist) {
 			return whitelist.find(mask => {
 				if (_.isString(mask)) {
-					return nanomatch.isMatch(action, mask, { unixify: false })
+					return match(action, mask)
 				}
 				else if (_.isRegExp(mask)) {
 					return mask.test(action)
 				}
 			}) != null
 		},
-
     makeHandler:function(handlerItem){
       let whitelist = handlerItem.whitelist
       let opts = handlerItem.callOptions
