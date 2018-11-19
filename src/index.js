@@ -9,7 +9,7 @@ module.exports = {
   name:'io',
   settings:{
     // port: 3000,
-    // options: {}, //socket.io options
+    // io: {}, //socket.io options
     namespaces: {
       '/':{
         // middlewares:[],
@@ -29,35 +29,18 @@ module.exports = {
       }
     }
   },
-  created(){
-    this.handlers = {} //
-    let namespaces = this.settings.namespaces
-    for(let nsp in namespaces){
-      let item = namespaces[nsp]
-      debug('Add route:', item)
-      if(!this.handlers[nsp]) this.handlers[nsp] = {}
-      let events = item.events
-      for(let event in events){
-        let handlerItem = events[event]
-        if(typeof handlerItem === 'function'){ //custom handler
-          this.handlers[nsp][event] = handlerItem.bind(this)
-          return
-        }
-        this.handlers[nsp][event] = this.makeHandler(handlerItem)
-      }
-    }
-  },
   methods: {
     initServer(srv, opts){
       if ('object' == typeof srv && srv instanceof Object && !srv.listen) {
         opts = srv;
         srv = null;
       }
-      opts = opts || this.settings.options
-      srv = srv || this.settings.port
+      opts = opts || this.settings.io
+      srv = srv || this.server || this.settings.port
       this.io = new IO(srv, opts)
+      this.logger.info('Socket.io API Gateway started.')
     },
-    checkWhitelist(action, whitelist) {
+    checkIOWhitelist(action, whitelist) {
 			return whitelist.find(mask => {
 				if (_.isString(mask)) {
 					return match(action, mask)
@@ -67,11 +50,11 @@ module.exports = {
 				}
 			}) != null
 		},
-    makeHandler:function(handlerItem){
+    makeIOHandler:function(handlerItem){
       let whitelist = handlerItem.whitelist
       let opts = handlerItem.callOptions
       const svc = this
-      debug('MakeHandler', handlerItem)
+      debug('makeIOHandler', handlerItem)
       return async function(action, params, respond){
         debug(`Call action: `,action)
         if(_.isFunction(params)){
@@ -83,7 +66,7 @@ module.exports = {
           if(_.isFunction(respond)) respond(null, res)
         }catch(err){
           debug('Call action error:',err)
-          if(_.isFunction(respond)) svc.onError(err, respond)
+          if(_.isFunction(respond)) svc.onIOError(err, respond)
         }
       }
     },
@@ -98,8 +81,8 @@ module.exports = {
     saveUser(socket,ctx){
       socket.client.user = ctx.meta.user
     },
-    onError(err, respond){
-      debug('onError',err)
+    onIOError(err, respond){
+      debug('onIOError',err)
       const errObj = _.pick(err, ["name", "message", "code", "type", "data"]);
       return respond(errObj)
     },
@@ -126,6 +109,24 @@ module.exports = {
         })
       })
     },
+  },
+  created(){
+    this.handlers = {} //
+    let namespaces = this.settings.namespaces
+    for(let nsp in namespaces){
+      let item = namespaces[nsp]
+      debug('Add route:', item)
+      if(!this.handlers[nsp]) this.handlers[nsp] = {}
+      let events = item.events
+      for(let event in events){
+        let handlerItem = events[event]
+        if(typeof handlerItem === 'function'){ //custom handler
+          this.handlers[nsp][event] = handlerItem.bind(this)
+          return
+        }
+        this.handlers[nsp][event] = this.makeIOHandler(handlerItem)
+      }
+    }
   },
   started(){
     if(!this.io){
@@ -155,6 +156,18 @@ module.exports = {
       })
     }
   },
+  stopped(){
+    if(this.io){
+      return new Promise((resolve, reject)=>{
+        this.io.close(err=>{
+          // if (err)
+			    //   return reject(err) //Ignore this error
+					this.logger.info("Socket.io API Gateway stopped!")
+					resolve()
+        })
+      })
+    }
+  },
   actions: {
     call: {
       visibility: "private",
@@ -164,7 +177,7 @@ module.exports = {
           debug(`BadRequest:action is not string! action:`,action)
           throw new BadRequestError()
         }
-        if(handlerItem.whitelist && !this.checkWhitelist(action, handlerItem.whitelist)){
+        if(handlerItem.whitelist && !this.checkIOWhitelist(action, handlerItem.whitelist)){
           debug(`Service "${action}" not found`)
           throw new ServiceNotFoundError({action})
         }
@@ -179,7 +192,7 @@ module.exports = {
         let meta = this.getMeta(socket)
         opts = _.assign({meta},opts)
         debug('Call action:', action, params, opts)
-        const vName = this.version ? `v${this.version}.${this.name}` : this.name
+        // const vName = this.version ? `v${this.version}.${this.name}` : this.name
         // const ctx = Context.create(this.broker, {name: vName + ".call"}, this.broker.nodeID, params, opts || {})
         let args = { action, params, callOptions:opts }
         if(handlerItem.before){

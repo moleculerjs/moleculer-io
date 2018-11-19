@@ -45,6 +45,7 @@ $ npm install moleculer-io
 Using with Node http server:
 ```javascript
 const server = require('http').Server(app)
+const SocketIOService = require("moleculer-io")
 const ioService = broker.createService({
   name: 'io',
   mixins: [SocketIOService]
@@ -76,6 +77,22 @@ broker.createService({
 })
 broker.start()
 ```
+
+Or maybe you want to use it with `moleculer-web`
+```js
+const ApiService = require("moleculer-web");
+const SocketIOService = require("moleculer-io")
+broker.createService({
+  name: 'gw',
+  mixins: [ApiService,SocketIOService], //Should after moleculer-web
+	settings: {
+		port: 3000
+	}
+})
+broker.start()
+```
+`moleculer-io` will use the server created by `moleculer-web` automatically.
+
 
 ## Handle socket events
 Server:
@@ -431,12 +448,13 @@ broker.call('io.broadcast', {
   rooms: ['room1', 'room2'] //optional
 })
 ```
+Note: You should change the 'io' to the service name you created.
 
 ## Full settings
 ```javascript
 settings:{
   port: 3000,
-  options: {}, //socket.io options
+  io: {}, //socket.io options
   namespaces: {
     '/':{
       middlewares:[],
@@ -456,6 +474,9 @@ settings:{
 
 
 # Change logs
+**0.13.0**: `moleculer-io` can now get alone well with `moleculer-web`, you can use them together!
+	- settings.options -> settings.io
+
 **0.12.1**: CustomHandler context now bind to the service instance.
 
 **0.12.0**: Change `ctx.meta.$user` to `ctx.meta.user`, add `saveUser` method.
