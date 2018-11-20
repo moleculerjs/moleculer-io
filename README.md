@@ -474,6 +474,8 @@ settings:{
 
 
 # Change logs
+**0.13.0**: Add request logger.
+
 **0.13.0**: `moleculer-io` can now get alone well with `moleculer-web`, you can use them together!
 	- settings.options -> settings.io
 

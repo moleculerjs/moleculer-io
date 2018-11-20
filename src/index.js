@@ -4,6 +4,7 @@ const _ = require('lodash')
 const { match } = require("moleculer").Utils;
 const { ServiceNotFoundError } = require("moleculer").Errors;
 const { BadRequestError } = require('./errors')
+const chalk = require('chalk')
 
 module.exports = {
   name:'io',
@@ -56,16 +57,21 @@ module.exports = {
       const svc = this
       debug('makeIOHandler', handlerItem)
       return async function(action, params, respond){
-        debug(`Call action: `,action)
+        svc.logger.info(`   => Call '${action}' action`);
+        if (svc.settings.logRequestParams && svc.settings.logRequestParams in svc.logger)
+						svc.logger[svc.settings.logRequestParams]("   Params:", params);
         if(_.isFunction(params)){
           respond = params
           params = null
         }
         try{
           let res = await svc.actions.call({socket:this, action, params, opts, handlerItem})
+          svc.logger.info(`   <= ${chalk.green.bold('Success')} ${action} `, res)
           if(_.isFunction(respond)) respond(null, res)
         }catch(err){
-          debug('Call action error:',err)
+          if (svc.settings.log4XXResponses || (err && !_.inRange(err.code, 400, 500))) {
+						svc.logger.error("   Request error!", err.name, ":", err.message, "\n", err.stack, "\nData:", err.data);
+					}
           if(_.isFunction(respond)) svc.onIOError(err, respond)
         }
       }
