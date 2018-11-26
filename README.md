@@ -4,24 +4,24 @@
 
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
--   [Moleculer-io](#moleculer-io)
--   [Features](#features)
--   [Install](#install)
--   [Usage](#usage)
-    		\- [Init server](#init-server)
-    		\- [Handle socket events](#handle-socket-events)
-    		\- [Handle multiple events](#handle-multiple-events)
-    		\- [Custom handler](#custom-handler)
-    		\- [Handler hooks](#handler-hooks)
-    		\- [Calling options](#calling-options)
-    		\- [Middlewares](#middlewares)
-    		\- [Authorization](#authorization)
-    			\- [Make authorization on connection](#make-authorization-on-connection)
-    		\- [Joining and leaving rooms](#joining-and-leaving-rooms)
-    		\- [Broadcast](#broadcast)
-    		\- [Full settings](#full-settings)
--   [Change logs](#change-logs)
--   [License](#license)
+- [Moleculer-io](#moleculer-io)
+- [Features](#features)
+- [Install](#install)
+- [Usage](#usage)
+	- [Init server](#init-server)
+	- [Handle socket events](#handle-socket-events)
+	- [Handle multiple events](#handle-multiple-events)
+	- [Custom handler](#custom-handler)
+	- [Handler hooks](#handler-hooks)
+	- [Calling options](#calling-options)
+	- [Middlewares](#middlewares)
+	- [Authorization](#authorization)
+		- [Make authorization on connection](#make-authorization-on-connection)
+	- [Joining and leaving rooms](#joining-and-leaving-rooms)
+	- [Broadcast](#broadcast)
+	- [Full settings](#full-settings)
+- [Change logs](#change-logs)
+- [License](#license)
 
 <!-- /TOC -->
 
@@ -516,10 +516,10 @@ settings:{
 
 # Change logs
 
-**0.13.0**: Add request logger.
+**0.13.1**: Add request logger.
 
 **0.13.0**: `moleculer-io` can now get alone well with `moleculer-web`, you can use them together!
-	\- settings.options -> settings.io
+	- Note that `settings.options` now become to `settings.io`.
 
 **0.12.1**: CustomHandler context now bind to the service instance.
 
