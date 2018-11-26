@@ -57,7 +57,7 @@ module.exports = {
       const svc = this
       debug('makeIOHandler', handlerItem)
       return async function(action, params, respond){
-        svc.logger.info(`   => Call '${action}' action`);
+        svc.logger.info(`   => Client '${this.id}' call '${action}' action`);
         if (svc.settings.logRequestParams && svc.settings.logRequestParams in svc.logger)
 						svc.logger[svc.settings.logRequestParams]("   Params:", params);
         if(_.isFunction(params)){
@@ -66,7 +66,7 @@ module.exports = {
         }
         try{
           let res = await svc.actions.call({socket:this, action, params, opts, handlerItem})
-          svc.logger.info(`   <= ${chalk.green.bold('Success')} ${action} `, res)
+          svc.logger.info(`   <= ${chalk.green.bold('Success')} ${action}`)
           if(_.isFunction(respond)) respond(null, res)
         }catch(err){
           if (svc.settings.log4XXResponses || (err && !_.inRange(err.code, 400, 500))) {
