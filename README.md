@@ -4,24 +4,24 @@
 
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [Moleculer-io](#moleculer-io)
-- [Features](#features)
-- [Install](#install)
-- [Usage](#usage)
-	- [Init server](#init-server)
-	- [Handle socket events](#handle-socket-events)
-	- [Handle multiple events](#handle-multiple-events)
-	- [Custom handler](#custom-handler)
-	- [Handler hooks](#handler-hooks)
-	- [Calling options](#calling-options)
-	- [Middlewares](#middlewares)
-	- [Authorization](#authorization)
-		- [Make authorization on connection](#make-authorization-on-connection)
-	- [Joining and leaving rooms](#joining-and-leaving-rooms)
-	- [Broadcast](#broadcast)
-	- [Full settings](#full-settings)
-- [Change logs](#change-logs)
-- [License](#license)
+-   [Moleculer-io](#moleculer-io)
+-   [Features](#features)
+-   [Install](#install)
+-   [Usage](#usage)
+    		\- [Init server](#init-server)
+    		\- [Handle socket events](#handle-socket-events)
+    		\- [Handle multiple events](#handle-multiple-events)
+    		\- [Custom handler](#custom-handler)
+    		\- [Handler hooks](#handler-hooks)
+    		\- [Calling options](#calling-options)
+    		\- [Middlewares](#middlewares)
+    		\- [Authorization](#authorization)
+    			\- [Make authorization on connection](#make-authorization-on-connection)
+    		\- [Joining and leaving rooms](#joining-and-leaving-rooms)
+    		\- [Broadcast](#broadcast)
+    		\- [Full settings](#full-settings)
+-   [Change logs](#change-logs)
+-   [License](#license)
 
 <!-- /TOC -->
 
@@ -408,7 +408,9 @@ saveUser(socket,ctx){
 ### Make authorization on connection
 
 If you don't want to emit an event to login, you can use query to pass your token:
-```javascript
+
+```js
+// server
 broker.createService({
   name: 'io',
   mixins: [SocketIOService],
@@ -420,14 +422,14 @@ broker.createService({
             if (socket.handshake.query.token) {
               let token = socket.handshake.query.token
               try {
-                let user = await this.broker.call("users.resolveToken", {
+                let res = await this.broker.call("account.verifyToken", {
                   token
                 })
-								this.logger.info("Authenticated via JWT: ", user.username);
-	              // Reduce user fields (it will be transferred to other nodes)
-								socket.client.user = _.pick(user, ["_id", "username", "email", "image"]);
-              } catch (err) {
-                return next(new Error('Authentication error'));
+                if (res.token) socket.emit('setToken', res.token) //Update your token
+                socket.client.user = res.user
+              } catch (e) {
+                socket.emit('setToken', null) // verify failed, clear client token
+                return next()
               }
             }
             next()
@@ -435,6 +437,32 @@ broker.createService({
         ]
       }
     }
+  }
+})
+```
+
+```js
+// client
+let token = localStorage.getItem('myToken')
+const socket = io(process.env.SERVER_ADDR, {
+  query: token ? { token } : {}
+})
+
+socket.on('setToken', (token) => {
+  // Save your token here
+  if (token) {
+    localStorage.setItem('myToken', token)
+  } else {
+    localStorage.removeItem('myToken')
+  }
+})
+
+socket.on('reconnect_attempt', () => {
+  let token = localStorage.getItem('myToken')
+  if (token) {
+    socket.io.opts.query.token = token
+  } else {
+    delete socket.io.opts.query.token
   }
 })
 ```
@@ -519,7 +547,7 @@ settings:{
 **0.13.1**: Add request logger.
 
 **0.13.0**: `moleculer-io` can now get alone well with `moleculer-web`, you can use them together!
-	- Note that `settings.options` now become to `settings.io`.
+	\- Note that `settings.options` now become to `settings.io`.
 
 **0.12.1**: CustomHandler context now bind to the service instance.
 
