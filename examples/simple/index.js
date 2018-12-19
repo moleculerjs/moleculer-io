@@ -1,5 +1,6 @@
 const IO = require('socket.io')
 const { ServiceBroker } = require('moleculer')
+const SocketIOAdapter = require('socket.io-redis')
 const SocketIOService = require('../../')
 const express = require('express')
 const fs = require('fs')
@@ -88,6 +89,13 @@ const ioService = broker.createService({
   name: 'io',
   mixins: [SocketIOService],
   settings:{
+  	adapter: {
+  		module: SocketIOAdapter,
+		options: {
+			host: 'redis',
+			port: 6379
+		}
+	},
     namespaces: {
       '/':{
         middlewares:[function(socket, next){

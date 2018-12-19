@@ -19,6 +19,7 @@
 		- [Make authorization on connection](#make-authorization-on-connection)
 	- [Joining and leaving rooms](#joining-and-leaving-rooms)
 	- [Broadcast](#broadcast)
+	- [Using multiple instances](#using-multiple-instances)
 	- [Full settings](#full-settings)
 - [Change logs](#change-logs)
 - [License](#license)
@@ -519,12 +520,42 @@ broker.call('io.broadcast', {
 
 Note: You should change the 'io' to the service name you created.
 
+## Using multiple instances
+
+If you plan for a highly available setup (launching multiple instances of this service behind a Load Balancer), 
+you will have to take some extra steps. Due to the nature of WebSockets these instances will need a PubSub capable broker
+to connect to, in order to broadcast messages to sockets which are connected to other instances. For a more
+in depth explanation of this concept, and additional steps that have to be taken (such as Load Balancer configuration), refere to the [Socket.io Documentation](https://socket.io/docs/using-multiple-nodes/).
+
+In order to interconnect this service with other services, start the service with an adapter:
+
+```javascript
+broker.createService({
+    name: 'io',
+    mixins: [SocketIOService],
+    settings:{
+        port:3000, //will call initServer() on broker.start()
+        adapter: {
+            module: require("socket.io-redis"),
+            options: { 
+                host: 'redis', 
+                port: 6379 
+            } 
+        }
+    }
+})
+```
+
 ## Full settings
 
 ```javascript
 settings:{
   port: 3000,
   io: {}, //socket.io options
+  adapter: {
+  	module: require('socket.io-...') // socket.io adapter module
+  	options: {} // socket.io adapter options
+  },
   namespaces: {
     '/':{
       middlewares:[],
@@ -543,6 +574,8 @@ settings:{
 ```
 
 # Change logs
+
+**0.13.2**: Added socket.io adapter options for intercommunication of multiple instances
 
 **0.13.1**: Add request logger.
 
