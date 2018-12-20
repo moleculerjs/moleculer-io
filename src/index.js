@@ -11,6 +11,7 @@ module.exports = {
   settings:{
     // port: 3000,
     // io: {}, //socket.io options
+    // adapter: { module: require('socket.io-redis'), options: { host: 'redis', port: 6379 }}
     namespaces: {
       '/':{
         // middlewares:[],
@@ -39,6 +40,9 @@ module.exports = {
       opts = opts || this.settings.io
       srv = srv || this.server || this.settings.port
       this.io = new IO(srv, opts)
+      if (this.settings.adapter && this.settings.adapter.module) {
+        this.io.adapter(this.settings.adapter.module(this.settings.adapter.options));
+      }
       this.logger.info('Socket.io API Gateway started.')
     },
     checkIOWhitelist(action, whitelist) {

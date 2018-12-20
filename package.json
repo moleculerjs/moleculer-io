@@ -1,6 +1,6 @@
 {
   "name": "moleculer-io",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "An API GateWay service for moleculerjs using socket.io",
   "main": "lib/index.js",
   "directories": {
@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "babel src -d lib --watch",
-    "example": "node examples/simple/index.js",
+    "example": "npm install && node examples/simple/index.js",
     "build": "babel src -d lib",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -28,13 +28,14 @@
     "chalk": "^2.4.1",
     "debug": "^3.1.0",
     "lodash": "^4.17.10",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "express": "^4.16.3",
     "fs-extra": "^7.0.1",
-    "moleculer": "^0.13.3"
+    "moleculer": "^0.13.3",
+    "socket.io-redis": "^5.2.0"
   }
 }
