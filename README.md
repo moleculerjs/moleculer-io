@@ -210,9 +210,9 @@ broker.createService({
       '/':{
         events:{
           'call':{},
-          'myCustomEventHandler': function(data, ack){ // write your handler function here.
-            let socket = this
-            socket.emit('hello', 'world')
+          'myCustomEventHandler': function(socket, params){ // write your handler function here.
+            console.log('socket id', socket.id)
+            this.emit('hello', 'world')
           }
         }
       }
