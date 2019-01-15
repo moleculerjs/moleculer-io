@@ -60,8 +60,8 @@ module.exports = {
       let opts = handlerItem.callOptions
       const svc = this
       debug('makeIOHandler', handlerItem)
-      return async function(action, params, respond){
-        svc.logger.info(`   => Client '${this.id}' call '${action}' action`);
+      return async function(socket, action, params, respond){
+        svc.logger.info(`   => Client '${socket.id}' call '${action}' action`);
         if (svc.settings.logRequestParams && svc.settings.logRequestParams in svc.logger)
 						svc.logger[svc.settings.logRequestParams]("   Params:", params);
         if(_.isFunction(params)){
@@ -69,7 +69,7 @@ module.exports = {
           params = null
         }
         try{
-          let res = await svc.actions.call({socket:this, action, params, opts, handlerItem})
+          let res = await svc.actions.call({socket:socket, action, params, opts, handlerItem})
           svc.logger.info(`   <= ${chalk.green.bold('Success')} ${action}`)
           if(_.isFunction(respond)) respond(null, res)
         }catch(err){
@@ -131,10 +131,11 @@ module.exports = {
       for(let event in events){
         let handlerItem = events[event]
         if(typeof handlerItem === 'function'){ //custom handler
-          this.handlers[nsp][event] = handlerItem.bind(this)
-          return
+          this.handlers[nsp][event] = handlerItem//.bind(this)
+          //return
+        } else {
+          this.handlers[nsp][event] = this.makeIOHandler(handlerItem)
         }
-        this.handlers[nsp][event] = this.makeIOHandler(handlerItem)
       }
     }
   },
@@ -161,7 +162,10 @@ module.exports = {
         }
         for(let eventName in handlers){
           debug('Attach event:', eventName)
-          socket.on(eventName, handlers[eventName])
+          var _this = this
+          socket.on(eventName, (...params) => {
+            handlers[eventName].call(_this,socket, ...params)
+          })
         }
       })
     }
