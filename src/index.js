@@ -131,7 +131,7 @@ module.exports = {
       for(let event in events){
         let handlerItem = events[event]
         if(typeof handlerItem === 'function'){ //custom handler
-          this.handlers[nsp][event] = handlerItem.bind(this)
+          this.handlers[nsp][event] = handlerItem
           return
         }
         this.handlers[nsp][event] = this.makeIOHandler(handlerItem)
@@ -153,6 +153,7 @@ module.exports = {
       }
       let handlers = this.handlers[nsp]
       namespace.on('connection', socket=>{
+        socket.$service = this
         this.logger.info(`(nsp:'${nsp}') Client connected:`,socket.id)
         if(item.packetMiddlewares){ //socketmiddlewares
           for(let middleware of item.packetMiddlewares){

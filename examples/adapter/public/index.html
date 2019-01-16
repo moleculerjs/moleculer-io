@@ -12,14 +12,10 @@
 	<button onclick="callMath()">Call `math.add` via websocket</button>
 	<button onclick="login()">login</button>
 	<button onclick="getUserInfo()">getUserInfo</button>
+	<input type="file" name="file" id="fileToUpload" onchange="upload()">
 	<button onclick="getRooms()">Get rooms</button>
 	<button onclick="joinRoom()">Join room "testRoom"</button>
 	<button onclick="leaveRoom()">Leave room "testRoom"</button>
-	<br>
-	<p>Upload a file over websocket:<br>
-		<input type="file" name="file" id="fileToUpload" onchange="upload()">
-	</p>
-
 	<div>
 		<pre id="res"></pre>
 	</div>
@@ -81,12 +77,7 @@
 				if(err){
 					alert(JSON.stringify(err))
 				}else{
-					let p = document.createElement('p')
-					p.textContent = 'File upload success!\n'
-					let img = document.createElement('img')
-					img.setAttribute('src', "/upload/"+ res)
-					p.appendChild(img)
-					document.getElementById("res").appendChild(p)
+					document.getElementById("res").textContent += 'File upload success!'+ JSON.stringify(res)+ '\n'
 					console.log('response file:', res)
 				}
 			})

@@ -57,3 +57,5 @@ typings/
 # dotenv environment variables file
 .env
 
+# Upload files
+examples/**/upload

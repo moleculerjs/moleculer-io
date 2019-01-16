@@ -7,8 +7,12 @@ const fs = require('fs')
 const path = require('path')
 const Duplex = require('stream').Duplex;
 const app = express()
-app.use(express.static(path.join(__dirname, 'public')))
+
+app.get('/', function (req, res) {
+  res.sendFile(__dirname + '/public/index.html');
+});
 const server = require('http').Server(app)
+
 
 const broker = new ServiceBroker({
   logger: console,
@@ -85,6 +89,13 @@ const ioService = broker.createService({
   name: 'io',
   mixins: [SocketIOService],
   settings: {
+  	adapter: {
+  		module: SocketIOAdapter,
+  		options: {
+  			host: 'redis',
+  			port: 6379
+  		}
+  	},
     namespaces: {
       '/':{
         middlewares:[function(socket, next){

@@ -213,6 +213,7 @@ broker.createService({
           'myCustomEventHandler': function(data, ack){ // write your handler function here.
             let socket = this
             socket.emit('hello', 'world')
+						socket.$service.broker.call('math.add', { a:123, b:456 })
           }
         }
       }
@@ -220,6 +221,9 @@ broker.createService({
   }
 })
 ```
+There is an internal pointer in socket objects:
+- `socket.$service` is pointed to this service instance.
+
 
 ## Handler hooks
 
@@ -522,7 +526,7 @@ Note: You should change the 'io' to the service name you created.
 
 ## Using multiple instances
 
-If you plan for a highly available setup (launching multiple instances of this service behind a Load Balancer), 
+If you plan for a highly available setup (launching multiple instances of this service behind a Load Balancer),
 you will have to take some extra steps. Due to the nature of WebSockets these instances will need a PubSub capable broker
 to connect to, in order to broadcast messages to sockets which are connected to other instances. For a more
 in depth explanation of this concept, and additional steps that have to be taken (such as Load Balancer configuration), refere to the [Socket.io Documentation](https://socket.io/docs/using-multiple-nodes/).
@@ -537,10 +541,10 @@ broker.createService({
         port:3000, //will call initServer() on broker.start()
         adapter: {
             module: require("socket.io-redis"),
-            options: { 
-                host: 'redis', 
-                port: 6379 
-            } 
+            options: {
+                host: 'redis',
+                port: 6379
+            }
         }
     }
 })
@@ -574,6 +578,7 @@ settings:{
 ```
 
 # Change logs
+**0.13.3**: Add internal pointer to service instance, make `socket.$service` pointed to service instance.
 
 **0.13.2**: Added socket.io adapter options for intercommunication of multiple instances
 

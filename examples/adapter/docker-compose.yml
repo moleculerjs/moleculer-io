@@ -1,0 +1,14 @@
+version: "2.2"
+
+services:
+  socketio:
+    image: node:11-alpine
+    working_dir: /usr/src/app
+    volumes:
+      - ./../../:/usr/src/app
+    command: npm run example
+    ports:
+      - 3000:3000
+  redis:
+    image: redis
+
