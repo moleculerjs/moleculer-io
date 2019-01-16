@@ -132,9 +132,9 @@ module.exports = {
         let handlerItem = events[event]
         if(typeof handlerItem === 'function'){ //custom handler
           this.handlers[nsp][event] = handlerItem
-          return
+        }else{
+          this.handlers[nsp][event] = this.makeIOHandler(handlerItem)
         }
-        this.handlers[nsp][event] = this.makeIOHandler(handlerItem)
       }
     }
   },

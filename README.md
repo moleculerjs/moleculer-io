@@ -578,6 +578,8 @@ settings:{
 ```
 
 # Change logs
+**0.13.4**: Fix bug of multiple custom event handler.
+
 **0.13.3**: Add internal pointer to service instance, make `socket.$service` pointed to service instance.
 
 **0.13.2**: Added socket.io adapter options for intercommunication of multiple instances

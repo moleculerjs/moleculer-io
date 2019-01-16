@@ -1,6 +1,6 @@
 {
   "name": "moleculer-io",
-  "version": "0.13.3",
+  "version": "0.13.4",
   "description": "An API GateWay service for moleculerjs using socket.io",
   "main": "lib/index.js",
   "directories": {
