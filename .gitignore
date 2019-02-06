@@ -58,4 +58,6 @@ typings/
 .env
 
 # Upload files
-examples/**/upload
+examples/**/upload/*
+!examples/**/upload/.gitkeep
+lib

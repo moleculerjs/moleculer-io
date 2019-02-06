@@ -1,4 +1,4 @@
-![LOGO](https://raw.githubusercontent.com/tiaod/moleculer-io/master/examples/assets/logo.png)
+![LOGO](https://raw.githubusercontent.com/tiaod/moleculer-io/master/examples/full/public/logo.png)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tiaod/moleculer-io/master/LICENSE)
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 
@@ -59,7 +59,8 @@ const ioService = broker.createService({
   mixins: [SocketIOService]
 })
 
-ioService.initServer(server)
+ioService.initSocketIO(server)
+
 // Once the initServer() was called, you can access the io object from ioService.io
 broker.start()
 server.listen(3000)
@@ -68,22 +69,11 @@ server.listen(3000)
 Or let moleculer-io create a server for you:
 
 ```javascript
-const ioService = broker.createService({
-  name: 'io',
-  mixins: [SocketIOService]
-})
-ioService.initServer(3000)
-broker.start()
-```
-
-More simple:
-
-```javascript
 broker.createService({
   name: 'io',
   mixins: [SocketIOService],
-  settings:{
-    port:3000 //will call initServer() on broker.start()
+  settings: {
+    port: 3000 //will call initServer() on broker.start()
   }
 })
 broker.start()
@@ -95,16 +85,15 @@ Or maybe you want to use it with `moleculer-web`
 const ApiService = require("moleculer-web");
 const SocketIOService = require("moleculer-io")
 broker.createService({
-  name: 'gw',
-  mixins: [ApiService,SocketIOService], //Should after moleculer-web
-	settings: {
-		port: 3000
-	}
+  name: 'gateway',
+  mixins: [ApiService, SocketIOService], //Should after moleculer-web
+  settings: {
+    port: 3000
+  }
 })
 broker.start()
 ```
-
-`moleculer-io` will use the server created by `moleculer-web` automatically.
+In this case, `moleculer-io` will use the server created by `moleculer-web` .
 
 ## Handle socket events
 
@@ -112,22 +101,20 @@ Server:
 
 ```javascript
 const IO = require('socket.io')
-const { ServiceBroker } = require('moleculer')
+const {
+  ServiceBroker
+} = require('moleculer')
 const SocketIOService = require('moleculer-io')
 
-const broker = new ServiceBroker({
-  logger: console,
-  metrics:true,
-  validation: true
-})
+const broker = new ServiceBroker()
 
 broker.createService({
-	name: "math",
-	actions: {
-		add(ctx) {
-			return Number(ctx.params.a) + Number(ctx.params.b);
-		}
-	}
+  name: "math",
+  actions: {
+    add(ctx) {
+      return Number(ctx.params.a) + Number(ctx.params.b);
+    }
+  }
 })
 
 const ioService = broker.createService({
@@ -155,10 +142,11 @@ Examples:
 ```javascript
 const io = require('socket.io-client')
 const socket = io('http://localhost:3000')
-socket.emit('call','math.add',{a:123, b:456},function(err,res){
-  if(err){
+socket.emit('call', 'math.add', { a: 123, b: 456},
+function(err, res) {
+  if (err) {
     console.error(err)
-  }else{
+  } else {
     console.log('call success:', res)
   }
 })
@@ -174,20 +162,22 @@ broker.createService({
   mixins: [SocketIOService],
   settings: {
     port: 3000,
-    namespaces: {
-      '/':{
-        events: {
-          'call':{
-            whitelist: [
-              'math.add'
-            ],
-            callOptions: {}
-          },
-          'adminCall': {
-            whitelist: [
-              'users.*',
-              '$node.*'
-            ]
+    io: {
+      namespaces: {
+        '/': {
+          events: {
+            'call': {
+              whitelist: [
+                'math.add'
+              ],
+              callOptions: {}
+            },
+            'adminCall': {
+              whitelist: [
+                'users.*',
+                '$node.*'
+              ]
+            }
           }
         }
       }
@@ -202,22 +192,27 @@ You can make use of custom functions within the declaration of event handler.
 
 ```javascript
 broker.createService({
-  name:'io',
+  name: 'io',
   mixins: [SocketIOService],
   settings: {
-    port:3000,
-    namespaces: {
-      '/':{
-        events:{
-          'call':{},
-          'myCustomEventHandler': function(data, ack){ // write your handler function here.
-            let socket = this
-            socket.emit('hello', 'world')
-						socket.$service.broker.call('math.add', { a:123, b:456 })
-          }
-        }
-      }
-    }
+    port: 3000,
+    io:{
+			namespaces: {
+	      '/': {
+	        events: {
+	          'call': {},
+	          'myCustomEventHandler': function(data, ack) { // write your handler function here.
+	            let socket = this
+	            socket.emit('hello', 'world')
+	            socket.$service.broker.call('math.add', {
+	              a: 123,
+	              b: 456
+	            })
+	          }
+	        }
+	      }
+	    }
+		}
   }
 })
 ```
@@ -234,25 +229,26 @@ broker.createService({
   name: 'io',
   mixins: [SocketIOService],
   settings: {
-    namespaces: {
-      '/':{
-        events:{
-          'call':{
-            whitelist: [
-              'math.*'
-            ],
-            before: async function(ctx, socket, args){ //before hook
-              //args: An object includes { action, params, callOptions }
-              console.log('before hook:', args)
-            },
-            after:async function(ctx, socket, res){ //after hook
-              console.log('after hook', res)
-              // res: The respose data.
-            }
-          }
-        }
-      }
-    }
+    io: {
+			namespaces: {
+	      '/': {
+	        events: {
+	          'call': {
+	            whitelist: [
+	              'math.*'
+	            ],
+	            onBeforeCall: async function(ctx, socket, action, params, callOptions) { //before hook
+	              console.log('before hook:', params)
+	            },
+	            onAfterCall: async function(ctx, socket, res) { //after hook
+	              console.log('after hook', res)
+	              // res: The respose data.
+	            }
+	          }
+	        }
+	      }
+	    }
+		}
   }
 })
 ```
@@ -265,25 +261,28 @@ The handler has a callOptions property which is passed to broker.call. So you ca
 broker.createService({
   name: 'io',
   mixins: [SocketIOService],
-  settings:{
-    namespaces:{
-      '/':{
-        events:{
-          'call':{
-            callOptions:{
-              timeout: 500,
-              retryCount: 0,
-              fallbackResponse(ctx, err) { ... }
-            }
-          }
-        }
-      }
-    }
+  settings: {
+    io: {
+			namespaces: {
+	      '/': {
+	        events: {
+	          'call': {
+	            callOptions: {
+	              timeout: 500,
+	              retryCount: 0,
+	              fallbackResponse(ctx, err) { ...
+	              }
+	            }
+	          }
+	        }
+	      }
+	    }
+		}
   }
 })
 ```
 
-Note: If you provie a meta field here, it replace the getMeta method's result.
+Note: If you provie a meta field here, it replace the socketGetMeta method's result.
 
 ## Middlewares
 
@@ -293,23 +292,25 @@ Register middlewares. Both namespace middlewares and packet middlewares are supp
 broker.createService({
   name: 'io',
   mixins: [SocketIOService],
-  settings:{
-    namespaces: {
-      '/': {
-        middlewares:[ //Namespace level middlewares, equipment to namespace.use()
-          function(socket, next) {
-             if (socket.request.headers.cookie) return next();
-             next(new Error('Authentication error'));
-           }
-        ],
-        packetMiddlewares: [ // equipment to socket.use()
-          function(packet, next) {
-             if (packet.doge === true) return next();
-             next(new Error('Not a doge error'));
-           }
-        ],
-        events:{
-          'call': {}
+  settings: {
+    io: {
+      namespaces: {
+        '/': {
+          middlewares: [ //Namespace level middlewares, equipment to namespace.use()
+            function(socket, next) {
+              if (socket.request.headers.cookie) return next();
+              next(new Error('Authentication error'));
+            }
+          ],
+          packetMiddlewares: [ // equipment to socket.use()
+            function(packet, next) {
+              if (packet.doge === true) return next();
+              next(new Error('Not a doge error'));
+            }
+          ],
+          events: {
+            'call': {}
+          }
         }
       }
     }
@@ -321,38 +322,49 @@ broker.createService({
 
 ## Authorization
 
-You can implement authorization. For this you need to add an handler.
+You can implement authorization. Do 2 things to enable it.
+
+- Set `authorization: true` in your namespace
+- Define the `socketAuthorize` method in service.
 
 ```javascript
 broker.createService({
   name: 'io',
   mixins: [SocketIOService],
   settings: {
-    namespaces: {
-      '/':{
-        events:{
-          'call':{
-            whitelist: [
-              'math.*',
-              'accounts.*'
-            ]
+    io: {
+      namespaces: {
+        '/': {
+          authorization: true, // First thing
+          events: {
+            'call': {
+              whitelist: [
+                'math.*',
+                'accounts.*'
+              ]
+            }
           }
         }
       }
     }
-  }
-})
-
-broker.createService({
-  name: 'accounts',
-  actions: {
-    login(ctx){
-      if(ctx.params.user == 'tiaod' && ctx.params.password == 'pass'){
-        ctx.meta.user = {id:'tiaod'} // This will save to socket.client.user
+  },
+  methods: {
+    // Second thing
+    socketAuthorize(socket, eventHandler){
+      let accessToken = socket.handshake.query.token
+      if (accessToken) {
+        if (accessToken === "12345") {
+        // valid credential, save the user to socket.client.user
+          socket.client.user = { id: 1, detail: "You are authorized using token.", name: "John Doe" }
+          return Promise.resolve()
+        } else {
+        // invalid credentials
+          return Promise.reject()
+        }
+      } else {
+      // anonymous user
+        return Promise.resolve()
       }
-    },
-    getUserInfo(ctx){
-      return ctx.meta.user //Once user was logged in, you can get user here.
     }
   }
 })
@@ -361,21 +373,19 @@ broker.createService({
 Client:
 
 ```javascript
-socket.emit('login', 'accounts.login', {user: 'tiaod', password: 'pass'}, function(err,res){
-  if(err){
-    alert(JSON.stringify(err))
-  }else{
-    console.log('Login success!')
+const socket = io({
+  query: {
+    token: '12345'
   }
 })
 ```
 
-See `examples/simple`
+See [`examples/full`](examples/full)
 
-Also you could overwrite the getMeta method to add more addition meta info. The default getMeta method is:
+Also you could overwrite the `socketGetMeta` method to add more addition meta info. The default `socketGetMeta` method is:
 
 ```javascript
-getMeta(socket){
+socketGetMeta(socket){
   return {
     user: socket.client.user,
     $rooms: Object.keys(socket.rooms)
@@ -387,87 +397,21 @@ Example to add more additional info:
 
 ```javascript
 broker.createService({
-  name:'io',
+  name: 'io',
   mixins: [SocketIOService],
-  methods:{
-    getMeta(socket){ //construct the meta object.
+  methods: {
+    socketGetMeta(socket) { //construct the meta object.
       return {
         user: socket.client.user,
         $rooms: Object.keys(socket.rooms),
         socketId: socket.id
       }
+    },
+    // In addition, you can also customize the place where ctx.meta.user is stored.
+    // Here is the default method the save user:
+    socketSaveMeta(socket, ctx) {
+      socket.client.user = ctx.meta.user
     }
-  }
-})
-```
-
-By default, `ctx.meta.user` will save to `socket.client.user`, you can also overwrite it.
-The default `saveUser` method is:
-
-```javascript
-saveUser(socket,ctx){
-	socket.client.user = ctx.meta.user
-}
-```
-
-### Make authorization on connection
-
-If you don't want to emit an event to login, you can use query to pass your token:
-
-```js
-// server
-broker.createService({
-  name: 'io',
-  mixins: [SocketIOService],
-  settings: {
-    namespaces: {
-      '/': {
-        middlewares: [
-          async function(socket, next) {
-            if (socket.handshake.query.token) {
-              let token = socket.handshake.query.token
-              try {
-                let res = await this.broker.call("account.verifyToken", {
-                  token
-                })
-                if (res.token) socket.emit('setToken', res.token) //Update your token
-                socket.client.user = res.user
-              } catch (e) {
-                socket.emit('setToken', null) // verify failed, clear client token
-                return next()
-              }
-            }
-            next()
-          }
-        ]
-      }
-    }
-  }
-})
-```
-
-```js
-// client
-let token = localStorage.getItem('myToken')
-const socket = io(process.env.SERVER_ADDR, {
-  query: token ? { token } : {}
-})
-
-socket.on('setToken', (token) => {
-  // Save your token here
-  if (token) {
-    localStorage.setItem('myToken', token)
-  } else {
-    localStorage.removeItem('myToken')
-  }
-})
-
-socket.on('reconnect_attempt', () => {
-  let token = localStorage.getItem('myToken')
-  if (token) {
-    socket.io.opts.query.token = token
-  } else {
-    delete socket.io.opts.query.token
   }
 })
 ```
@@ -535,41 +479,47 @@ In order to interconnect this service with other services, start the service wit
 
 ```javascript
 broker.createService({
-    name: 'io',
-    mixins: [SocketIOService],
-    settings:{
-        port:3000, //will call initServer() on broker.start()
-        adapter: {
-            module: require("socket.io-redis"),
-            options: {
-                host: 'redis',
-                port: 6379
-            }
-        }
+  name: 'io',
+  mixins: [SocketIOService],
+  settings: {
+    port: 3000, //will call initServer() on broker.start()
+    io: {
+      options: {
+        adapter: require("socket.io-redis")({
+          host: 'redis',
+          port: 6379
+        })
+      }
     }
+  }
 })
 ```
 
 ## Full settings
 
 ```javascript
-settings:{
+settings: {
   port: 3000,
-  io: {}, //socket.io options
-  adapter: {
-  	module: require('socket.io-...') // socket.io adapter module
-  	options: {} // socket.io adapter options
-  },
-  namespaces: {
-    '/':{
-      middlewares:[],
-      packetMiddlewares:[],
-      events:{
-        'call':{
-          whitelist: [],
-          callOptions:{},
-          before: async function(ctx, socket, args){},
-          after:async function(ctx, socket, res){}
+  io: {
+    options: {}, //socket.io options
+    namespaces: {
+      '/':{
+        authorization: false,
+        middlewares: [],
+        packetMiddlewares:[],
+        events: {
+          call: {
+            whitelist: [
+              'math.*'
+            ],
+            callOptions:{},
+            onBeforeCall: async function(ctx, socket, args){
+              ctx.meta.socketid = socket.id
+            },
+            onAfterCall:async function(ctx, socket, data){
+             socket.emit('afterCall', data)
+            }
+          }
         }
       }
     }
@@ -578,6 +528,8 @@ settings:{
 ```
 
 # Change logs
+**1.0.0**: See [Migrate to 1.x](migration_to_v1.md).
+
 **0.13.4**: Fix bug of multiple custom event handler.
 
 **0.13.3**: Add internal pointer to service instance, make `socket.$service` pointed to service instance.
