@@ -55,11 +55,11 @@ settings: {
               'math.*'
             ],
             callOptions:{},
-            onBeforeCall: async function(ctx, socket, args){
+            onBeforeCall: async function(ctx, socket, action, params, callOptions){
               ctx.meta.socketid = socket.id
             },
-            onAfterCall:async function(ctx, socket, data){
-             socket.emit('afterCall', data)
+            onAfterCall:async function(ctx, socket, res){
+             socket.emit('afterCall', res)
             }
           }
         }
@@ -68,9 +68,13 @@ settings: {
   }
 }
 ```
+Changes:
+1. move `settings.namespaces` to the `settings.io.namespaces` field, and move the socket.io options to `settings.io.options`
+2. Hooks name are changed. `before` => `onBeforeCall`; `after` => `onAfterCall`
+
 **Why remove the adapter field? How can I set the adapter for socket.io?**
 
-Because it is not necessary, you can set it in `settings.io.options`:
+Because you can set it in `settings.io.options`:
 ```js
 broker.createService({
   name: 'io',
@@ -93,5 +97,5 @@ Then moleculer-io will add a authorize middleware to your namespace.
 
 Some service methods name are also changed
 - getMeta -> socketGetMeta
-- saveUser -> socketSaveUser
+- saveUser -> socketSaveMeta
 - onError -> socketOnError
