@@ -34,7 +34,6 @@ $ npm install moleculer-io
 	- [Calling options](#calling-options)
 	- [Middlewares](#middlewares)
 	- [Authorization](#authorization)
-		- [Make authorization on connection](#make-authorization-on-connection)
 	- [Joining and leaving rooms](#joining-and-leaving-rooms)
 	- [Broadcast](#broadcast)
 	- [Using multiple instances](#using-multiple-instances)
