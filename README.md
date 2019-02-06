@@ -2,30 +2,6 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tiaod/moleculer-io/master/LICENSE)
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 
-<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-
-- [Moleculer-io](#moleculer-io)
-- [Features](#features)
-- [Install](#install)
-- [Usage](#usage)
-	- [Init server](#init-server)
-	- [Handle socket events](#handle-socket-events)
-	- [Handle multiple events](#handle-multiple-events)
-	- [Custom handler](#custom-handler)
-	- [Handler hooks](#handler-hooks)
-	- [Calling options](#calling-options)
-	- [Middlewares](#middlewares)
-	- [Authorization](#authorization)
-		- [Make authorization on connection](#make-authorization-on-connection)
-	- [Joining and leaving rooms](#joining-and-leaving-rooms)
-	- [Broadcast](#broadcast)
-	- [Using multiple instances](#using-multiple-instances)
-	- [Full settings](#full-settings)
-- [Change logs](#change-logs)
-- [License](#license)
-
-<!-- /TOC -->
-
 # Moleculer-io
 
 The `moleculer-io` is the API gateway service for [Moleculer](https://github.com/moleculerjs/moleculer) using `socket.io`. Use it to publish your services.
@@ -44,6 +20,27 @@ The `moleculer-io` is the API gateway service for [Moleculer](https://github.com
 ```shell
 $ npm install moleculer-io
 ```
+
+# Table of contents
+<!-- - [Moleculer-io](#moleculer-io)
+- [Features](#features)
+- [Install](#install) -->
+- [Usage](#usage)
+	- [Init server](#init-server)
+	- [Handle socket events](#handle-socket-events)
+	- [Handle multiple events](#handle-multiple-events)
+	- [Custom handler](#custom-handler)
+	- [Handler hooks](#handler-hooks)
+	- [Calling options](#calling-options)
+	- [Middlewares](#middlewares)
+	- [Authorization](#authorization)
+		- [Make authorization on connection](#make-authorization-on-connection)
+	- [Joining and leaving rooms](#joining-and-leaving-rooms)
+	- [Broadcast](#broadcast)
+	- [Using multiple instances](#using-multiple-instances)
+	- [Full settings](#full-settings)
+- [Change logs](#change-logs)
+- [License](#license)
 
 # Usage
 
@@ -196,23 +193,23 @@ broker.createService({
   mixins: [SocketIOService],
   settings: {
     port: 3000,
-    io:{
-			namespaces: {
-	      '/': {
-	        events: {
-	          'call': {},
-	          'myCustomEventHandler': function(data, ack) { // write your handler function here.
-	            let socket = this
-	            socket.emit('hello', 'world')
-	            socket.$service.broker.call('math.add', {
-	              a: 123,
-	              b: 456
-	            })
-	          }
-	        }
-	      }
-	    }
-		}
+    io: {
+      namespaces: {
+        '/': {
+          events: {
+            'call': {},
+            'myCustomEventHandler': function(data, ack) { // write your handler function here.
+              let socket = this
+              socket.emit('hello', 'world')
+              socket.$service.broker.call('math.add', {
+                a: 123,
+                b: 456
+              })
+            }
+          }
+        }
+      }
+    }
   }
 })
 ```
@@ -230,25 +227,25 @@ broker.createService({
   mixins: [SocketIOService],
   settings: {
     io: {
-			namespaces: {
-	      '/': {
-	        events: {
-	          'call': {
-	            whitelist: [
-	              'math.*'
-	            ],
-	            onBeforeCall: async function(ctx, socket, action, params, callOptions) { //before hook
-	              console.log('before hook:', params)
-	            },
-	            onAfterCall: async function(ctx, socket, res) { //after hook
-	              console.log('after hook', res)
-	              // res: The respose data.
-	            }
-	          }
-	        }
-	      }
-	    }
-		}
+      namespaces: {
+        '/': {
+          events: {
+            'call': {
+              whitelist: [
+                'math.*'
+              ],
+              onBeforeCall: async function(ctx, socket, action, params, callOptions) { //before hook
+                  console.log('before hook:', params)
+                },
+              onAfterCall: async function(ctx, socket, res) { //after hook
+                console.log('after hook', res)
+                // res: The respose data.
+              }
+            }
+          }
+        }
+      }
+    }
   }
 })
 ```
@@ -263,21 +260,21 @@ broker.createService({
   mixins: [SocketIOService],
   settings: {
     io: {
-			namespaces: {
-	      '/': {
-	        events: {
-	          'call': {
-	            callOptions: {
-	              timeout: 500,
-	              retryCount: 0,
-	              fallbackResponse(ctx, err) { ...
-	              }
-	            }
-	          }
-	        }
-	      }
-	    }
-		}
+      namespaces: {
+        '/': {
+          events: {
+            'call': {
+              callOptions: {
+                timeout: 500,
+                retryCount: 0,
+                fallbackResponse(ctx, err) { ...
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 })
 ```
