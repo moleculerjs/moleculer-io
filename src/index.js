@@ -11,7 +11,6 @@ module.exports = {
     // port: 3000,
     io: {
       // options: {}, //socket.io options
-      // adapter: redis({ host: 'localhost', port: 6379 }),
       namespaces: {
         '/':{
           // middlewares: [],
@@ -34,6 +33,7 @@ module.exports = {
   },
   created(){
     let handlers = {}
+    let namespaces = this.settings.namespaces
     for(let nsp in namespaces){
       let item = namespaces[nsp]
       debug('Add route:', item)
@@ -147,9 +147,6 @@ module.exports = {
       opts = opts || this.settings.io
       srv = srv || this.server || this.settings.port
       this.io = new IO(srv, opts)
-      if (this.settings.adapter) {
-        this.io.adapter(this.settings.adapter)
-      }
       this.logger.info('Socket.io API Gateway started.')
     },
     socketGetMeta(){
