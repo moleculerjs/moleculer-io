@@ -147,6 +147,31 @@ module.exports = {
         }
         return res
       }
+    },
+    broadcast:{
+      params:{
+        event: { type:'string' },
+        namespace:{ type:'string', optional:true},
+        args: { type:'array',optional:true},
+        volatile: { type: 'boolean',optional:true},
+        local: { type:'boolean',optional:true},
+        rooms: { type:'array', items: 'string',optional:true}
+      },
+      async handler(ctx){
+        debug('brocast: ', ctx.params)
+        let namespace = this.io
+        if(ctx.params.namespace){
+          namespace = namespace.of(ctx.params.namespace)
+        }
+        if(ctx.params.volate) namespace = namespace.volate
+        if(ctx.params.local) namespace = namespace.local
+        if(ctx.params.rooms){
+          for(let room of ctx.params.rooms){
+            namespace = namespace.to(room)
+          }
+        }
+        namespace.emit(ctx.params.event,...ctx.params.args)
+      }
     }
   },
   methods: {
