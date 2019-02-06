@@ -33,10 +33,10 @@ module.exports = {
   },
   created(){
     let handlers = {}
-    let namespaces = this.settings.namespaces
+    let namespaces = this.settings.io.namespaces
     for(let nsp in namespaces){
       let item = namespaces[nsp]
-      debug('Add route:', item)
+      this.logger.debug('Add route:', item)
       if(!handlers[nsp]) handlers[nsp] = {}
       let events = item.events
       for(let event in events){
@@ -44,7 +44,7 @@ module.exports = {
         if(typeof handler === 'function'){ //custom handler
           handlers[nsp][event] = handler
         }else{
-          handlers[nsp][event] = makeHandler(handler)
+          handlers[nsp][event] = makeHandler(this, handler)
         }
       }
     }
@@ -54,15 +54,26 @@ module.exports = {
     if(!this.io){
       this.initSocketIO()
     }
-    let namespaces = this.settings.namespaces
+    let namespaces = this.settings.io.namespaces
     for(let nsp in namespaces){
+      let item = namespaces[nsp]
       let namespace = this.io.of(nsp)
-      if(namespaces[nsp].middlewares){ //Server middlewares
-        for(let middleware of namespaces[nsp].middlewares){
+      if (item.authorization) {
+        this.logger.debug(`Add authorization to handler:`, item)
+        if (!_.isFunction(this.socketAuthorize)) {
+          this.logger.warn("Define 'socketAuthorize' method in the service to enable authorization.")
+          item.authorization = false
+        }else{
+          // add authorize middleware
+          namespace.use(makeAuthorizeMiddleware(this,item))
+        }
+      }
+      if(item.middlewares){ //Server middlewares
+        for(let middleware of item.middlewares){
           namespace.use(middleware.bind(this))
         }
       }
-      let handlers = this.settings.io.handlers[key]
+      let handlers = this.settings.io.handlers[nsp]
       namespace.on('connection', socket=>{
         socket.$service = this
         this.logger.info(`(nsp:'${nsp}') Client connected:`,socket.id)
@@ -95,16 +106,16 @@ module.exports = {
       async handler(ctx){
         let {socket, action, params, handlerItem} = ctx.params
         if(!_.isString(action)){
-          debug(`BadRequest:action is not string! action:`,action)
+          this.logger.debug(`BadRequest:action is not string! action:`,action)
           throw new BadRequestError()
         }
         //Check whitelist
-        if(handlerItem.whitelist && !this.checkIOWhitelist(action, handlerItem.whitelist)){
-          debug(`Service "${action}" not found`)
+        if(handlerItem.whitelist && !checkWhitelist(action, handlerItem.whitelist)){
+          this.logger.debug(`Service "${action}" not in whitelist`)
           throw new ServiceNotFoundError({action})
         }
         // Check endpoint visibility
-        const endpoint = svc.broker.findNextActionEndpoint(action)
+        const endpoint = this.broker.findNextActionEndpoint(action)
         if (endpoint instanceof Error)
           throw endpoint
         if (endpoint.action.visibility != null && endpoint.action.visibility != "published") {
@@ -113,7 +124,7 @@ module.exports = {
         }
         // get callOptions
         let opts = _.assign({
-          meta: this.getMeta(socket)
+          meta: this.socketGetMeta(socket)
         }, handlerItem.callOptions)
         this.logger.debug('Call action:', action, params, opts)
         if(handlerItem.onBeforeCall){
@@ -131,7 +142,7 @@ module.exports = {
           if(_.isArray(ctx.meta.$leave)){
             await Promise.all(ctx.meta.$leave.map(room=>this.leaveRoom(socket, room)))
           }else{
-            await this.leaveRoom(socket, ctx.meta.$leave)
+            await this.socketLeaveRoom(socket, ctx.meta.$leave)
           }
         }
         return res
@@ -149,24 +160,24 @@ module.exports = {
       this.io = new IO(srv, opts)
       this.logger.info('Socket.io API Gateway started.')
     },
-    socketGetMeta(){
+    socketGetMeta(socket){
       let meta = {
         user: socket.client.user,
         $rooms: Object.keys(socket.rooms)
       }
-      debug('getMeta', meta)
+      this.logger.debug('getMeta', meta)
       return meta
     },
     socketSaveMeta(socket,ctx){
       socket.client.user = ctx.meta.user
     },
     socketOnError(err, respond){
-      debug('onIOError',err)
+      this.logger.debug('onIOError',err)
       const errObj = _.pick(err, ["name", "message", "code", "type", "data"]);
       return respond(errObj)
     },
     socketJoinRooms(socket, rooms){
-      debug(`socket ${socket.id} join room:`, rooms)
+      this.logger.debug(`socket ${socket.id} join room:`, rooms)
       return new Promise(function(resolve, reject) {
         socket.join(rooms,err=>{
           if(err){
@@ -202,6 +213,16 @@ function checkWhitelist(action, whitelist){
   }) != null
 }
 
+function makeAuthorizeMiddleware(svc, handlerItem){
+  return async function authorizeMiddleware(socket, next){
+    try{
+      await svc.socketAuthorize(socket, handlerItem)
+      next()
+    }catch(e){
+      return next(e)
+    }
+  }
+}
 
 function makeHandler(svc, handlerItem){
   svc.logger.debug('makeHandler:', handlerItem)
@@ -214,7 +235,7 @@ function makeHandler(svc, handlerItem){
         respond = params
         params = null
       }
-      let res = await svc.actions.call({socket:this, action, params, opts, handlerItem})
+      let res = await svc.actions.call({socket:this, action, params, handlerItem})
       svc.logger.info(`   <= ${chalk.green.bold('Success')} ${action}`)
       if(_.isFunction(respond)) respond(null, res)
     }catch(err){

@@ -1,4 +1,4 @@
-![LOGO](https://raw.githubusercontent.com/tiaod/moleculer-io/master/examples/assets/logo.png)
+![LOGO](https://raw.githubusercontent.com/tiaod/moleculer-io/master/examples/full/public/logo.png)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tiaod/moleculer-io/master/LICENSE)
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 
@@ -59,7 +59,8 @@ const ioService = broker.createService({
   mixins: [SocketIOService]
 })
 
-ioService.initServer(server)
+ioService.initSocketIO(server)
+
 // Once the initServer() was called, you can access the io object from ioService.io
 broker.start()
 server.listen(3000)
@@ -68,23 +69,12 @@ server.listen(3000)
 Or let moleculer-io create a server for you:
 
 ```javascript
-const ioService = broker.createService({
-  name: 'io',
-  mixins: [SocketIOService]
-})
-ioService.initServer(3000)
-broker.start()
-```
-
-More simple:
-
-```javascript
 broker.createService({
   name: 'io',
   mixins: [SocketIOService],
-  settings:{
-    port:3000 //will call initServer() on broker.start()
-  }
+	settings:{
+		port:3000 //will call initServer() on broker.start()
+	}
 })
 broker.start()
 ```
@@ -95,16 +85,15 @@ Or maybe you want to use it with `moleculer-web`
 const ApiService = require("moleculer-web");
 const SocketIOService = require("moleculer-io")
 broker.createService({
-  name: 'gw',
-  mixins: [ApiService,SocketIOService], //Should after moleculer-web
+	name: 'gateway',
+	mixins: [ApiService, SocketIOService], //Should after moleculer-web
 	settings: {
 		port: 3000
 	}
 })
 broker.start()
 ```
-
-`moleculer-io` will use the server created by `moleculer-web` automatically.
+In this case, `moleculer-io` will use the server created by `moleculer-web` .
 
 ## Handle socket events
 
