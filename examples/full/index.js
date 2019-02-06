@@ -104,7 +104,8 @@ const ioService = broker.createService({
               whitelist: [
                 'math.*',
                 'accounts.*',
-                'rooms.*'
+                'rooms.*',
+                'io.*'
               ],
               onBeforeCall: async function(ctx, socket, action, params, callOptions){
                 console.log('before hook:', { action, params, callOptions })
