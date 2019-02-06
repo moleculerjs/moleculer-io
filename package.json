@@ -9,8 +9,9 @@
   "scripts": {
     "dev": "babel src -d lib --watch",
     "example": "npm install && node examples/simple/index.js",
-    "build": "babel src -d lib",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile": "babel -d lib/ src/",
+    "prepublish": "npm run compile"
   },
   "repository": {
     "type": "git",
@@ -26,7 +27,6 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.4.1",
-    "debug": "^3.1.0",
     "lodash": "^4.17.10",
     "socket.io": "^2.2.0"
   },
@@ -35,7 +35,8 @@
     "babel-preset-env": "^1.7.0",
     "express": "^4.16.3",
     "fs-extra": "^7.0.1",
-    "moleculer": "^0.13.3",
+    "moleculer": "^0.13.5",
+    "moleculer-web": "^0.8.5",
     "socket.io-redis": "^5.2.0"
   }
 }
