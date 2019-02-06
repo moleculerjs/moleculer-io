@@ -13,6 +13,7 @@ module.exports = {
       // options: {}, //socket.io options
       namespaces: {
         '/':{
+          // authorization: false,
           // middlewares: [],
           // packetMiddlewares:[],
           events: {
