@@ -71,6 +71,7 @@ settings: {
 Changes:
 1. move `settings.namespaces` to the `settings.io.namespaces` field, and move the socket.io options to `settings.io.options`
 2. Hooks name are changed. `before` => `onBeforeCall`; `after` => `onAfterCall`
+3. The `onBeforeCall` take the params of `(ctx, socket, action, params, callOptions)`
 
 **Why remove the adapter field? How can I set the adapter for socket.io?**
 

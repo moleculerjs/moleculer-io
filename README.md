@@ -509,11 +509,11 @@ settings: {
               'math.*'
             ],
             callOptions:{},
-            onBeforeCall: async function(ctx, socket, args){
+            onBeforeCall: async function(ctx, socket, action, params, callOptions){
               ctx.meta.socketid = socket.id
             },
-            onAfterCall:async function(ctx, socket, data){
-             socket.emit('afterCall', data)
+            onAfterCall:async function(ctx, socket, res){
+             socket.emit('afterCall', res)
             }
           }
         }
