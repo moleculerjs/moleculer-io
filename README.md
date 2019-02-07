@@ -1,7 +1,8 @@
 ![LOGO](https://raw.githubusercontent.com/tiaod/moleculer-io/master/examples/full/public/logo.png)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tiaod/moleculer-io/master/LICENSE)
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
-
+[![Known Vulnerabilities](https://snyk.io/test/github/tiaod/moleculer-io/badge.svg)](https://snyk.io/test/github/tiaod/moleculer-io)
+[![Downloads](https://img.shields.io/npm/dm/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 # Moleculer-io
 
 The `moleculer-io` is the API gateway service for [Moleculer](https://github.com/moleculerjs/moleculer) using `socket.io`. Use it to publish your services.
