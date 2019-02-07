@@ -8,7 +8,7 @@ ioService.initServer()
 ```
 In moleculer-io 1.x:
 ```js
-ioServer.initSocketIO()
+ioService.initSocketIO()
 ```
 
 ## Setting

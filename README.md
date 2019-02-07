@@ -57,7 +57,7 @@ const ioService = broker.createService({
 
 ioService.initSocketIO(server)
 
-// Once the initServer() was called, you can access the io object from ioService.io
+// Once the initSocketIO() was called, you can access the io object from ioService.io
 broker.start()
 server.listen(3000)
 ```
@@ -69,7 +69,7 @@ broker.createService({
   name: 'io',
   mixins: [SocketIOService],
   settings: {
-    port: 3000 //will call initServer() on broker.start()
+    port: 3000 //will call initSocketIO() on broker.start()
   }
 })
 broker.start()
@@ -478,7 +478,7 @@ broker.createService({
   name: 'io',
   mixins: [SocketIOService],
   settings: {
-    port: 3000, //will call initServer() on broker.start()
+    port: 3000,
     io: {
       options: {
         adapter: require("socket.io-redis")({
