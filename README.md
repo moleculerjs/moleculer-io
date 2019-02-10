@@ -351,9 +351,8 @@ broker.createService({
       let accessToken = socket.handshake.query.token
       if (accessToken) {
         if (accessToken === "12345") {
-        // valid credential, save the user to socket.client.user
-          socket.client.user = { id: 1, detail: "You are authorized using token.", name: "John Doe" }
-          return Promise.resolve()
+        // valid credential, return the user
+          return Promise.resolve({ id: 1, detail: "You are authorized using token.", name: "John Doe" })
         } else {
         // invalid credentials
           return Promise.reject()
@@ -404,7 +403,7 @@ broker.createService({
         socketId: socket.id
       }
     },
-    // In addition, you can also customize the place where ctx.meta.user is stored.
+    // In addition, you can also customize the place where user is stored.
     // Here is the default method the save user:
     socketSaveMeta(socket, ctx) {
       socket.client.user = ctx.meta.user
@@ -413,6 +412,22 @@ broker.createService({
 })
 ```
 
+If you want to authorize a user after socket connected, you can write an action to do it.
+```js
+broker.createService({
+  name: 'accounts',
+  actions: {
+    login(ctx){
+      if(ctx.params.user == 'tiaod' && ctx.params.password == 'pass'){
+        ctx.meta.user = {id:'tiaod'}
+      }
+    },
+    getUserInfo(ctx){
+      return ctx.meta.user
+    }
+  }
+})
+```
 ## Joining and leaving rooms
 
 In your action, set ctx.meta.$join or ctx.meta.$leave to the rooms you want to join or leave.
