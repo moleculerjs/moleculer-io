@@ -27,7 +27,7 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.4.1",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.11",
     "socket.io": "^2.2.0"
   },
   "devDependencies": {

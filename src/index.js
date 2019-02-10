@@ -195,7 +195,10 @@ module.exports = {
       return meta
     },
     socketSaveMeta(socket,ctx){
-      socket.client.user = ctx.meta.user
+      this.socketSaveUser(socket, ctx.meta.user)
+    },
+    socketSaveUser(socket, user){
+      socket.client.user = user
     },
     socketOnError(err, respond){
       this.logger.debug('onIOError',err)
@@ -242,7 +245,9 @@ function checkWhitelist(action, whitelist){
 function makeAuthorizeMiddleware(svc, handlerItem){
   return async function authorizeMiddleware(socket, next){
     try{
-      await svc.socketAuthorize(socket, handlerItem)
+      let res = await svc.socketAuthorize(socket, handlerItem)
+      if(res)
+        svc.socketSaveUser(socket, res)
       next()
     }catch(e){
       return next(e)

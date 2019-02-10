@@ -136,8 +136,7 @@ const ioService = broker.createService({
       if (accessToken) {
         if (accessToken === "12345") {
         // valid credential
-          socket.client.user = { id: 1, detail: "You are authorized using token.", name: "John Doe" }
-          return Promise.resolve()
+          return Promise.resolve({ id: 1, detail: "You are authorized using token.", name: "John Doe" })
         } else {
         // invalid credentials
           return Promise.reject()
