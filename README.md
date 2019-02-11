@@ -8,6 +8,7 @@
 The `moleculer-io` is the API gateway service for [Moleculer](https://github.com/moleculerjs/moleculer) using `socket.io`. Use it to publish your services.
 
 <h1>Features</h1>
+
 -   Call moleculer actions by emiting Socket.io events.
 -   Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.user`)
 -   Whitelist.
@@ -16,11 +17,13 @@ The `moleculer-io` is the API gateway service for [Moleculer](https://github.com
 -   Joining and leaving rooms.
 
 <h1>Install</h1>
+
 ```shell
 $ npm install moleculer-io
 ```
 
 <h1>Table of contents</h1>
+
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [Usage](#usage)
