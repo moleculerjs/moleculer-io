@@ -19,6 +19,8 @@ module.exports = {
           events: {
             call: {
               // whitelist: [],
+              // aliases: {},
+              // mappingPolicy: 'all',
               // callOptions:{},
               // onBeforeCall: async function(ctx, socket, args){
               //   ctx.meta.socketid = socket.id
@@ -110,6 +112,20 @@ module.exports = {
           this.logger.debug(`BadRequest:action is not string! action:`,action)
           throw new BadRequestError()
         }
+        // Handle aliases
+        let aliased = false;
+        const original = action;
+        if (handlerItem.aliases) {
+          const alias = handlerItem.aliases[action]
+          if (alias) {
+            aliased = true
+            action = alias
+          } else if (handlerItem.mappingPolicy === 'restrict') {
+            throw new ServiceNotFoundError({ action })
+          }
+        } else if (handlerItem.mappingPolicy === 'restrict') {
+          throw new ServiceNotFoundError({ action })
+        }
         //Check whitelist
         if(handlerItem.whitelist && !checkWhitelist(action, handlerItem.whitelist)){
           this.logger.debug(`Service "${action}" not in whitelist`)
@@ -159,7 +175,7 @@ module.exports = {
         rooms: { type:'array', items: 'string',optional:true}
       },
       async handler(ctx){
-        this.logger.debug('brocast: ', ctx.params)
+        this.logger.debug('broadcast: ', ctx.params)
         let namespace = this.io
         if(ctx.params.namespace){
           namespace = namespace.of(ctx.params.namespace)
