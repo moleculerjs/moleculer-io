@@ -90,6 +90,7 @@ module.exports = {
         }
       })
     }
+    this.logger.info('Socket.io API Gateway started.')
   },
   stopped(){
     if(this.io){
@@ -200,7 +201,6 @@ module.exports = {
       opts = opts || this.settings.io.options
       srv = srv || this.server || this.settings.port
       this.io = new IO(srv, opts)
-      this.logger.info('Socket.io API Gateway started.')
     },
     socketGetMeta(socket){
       let meta = {
