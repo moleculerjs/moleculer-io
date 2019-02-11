@@ -197,7 +197,7 @@ module.exports = {
         opts = srv;
         srv = null;
       }
-      opts = opts || this.settings.io
+      opts = opts || this.settings.io.options
       srv = srv || this.server || this.settings.port
       this.io = new IO(srv, opts)
       this.logger.info('Socket.io API Gateway started.')
