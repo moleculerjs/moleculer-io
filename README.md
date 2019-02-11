@@ -3,12 +3,11 @@
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 [![Known Vulnerabilities](https://snyk.io/test/github/tiaod/moleculer-io/badge.svg)](https://snyk.io/test/github/tiaod/moleculer-io)
 [![Downloads](https://img.shields.io/npm/dm/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
-# Moleculer-io
+<h1>Moleculer-io</h1>
 
 The `moleculer-io` is the API gateway service for [Moleculer](https://github.com/moleculerjs/moleculer) using `socket.io`. Use it to publish your services.
 
-# Features
-
+<h1>Features</h1>
 -   Call moleculer actions by emiting Socket.io events.
 -   Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.user`)
 -   Whitelist.
@@ -16,20 +15,20 @@ The `moleculer-io` is the API gateway service for [Moleculer](https://github.com
 -   Broadcast events.
 -   Joining and leaving rooms.
 
-# Install
-
+<h1>Install</h1>
 ```shell
 $ npm install moleculer-io
 ```
 
-# Table of contents
-<!-- - [Moleculer-io](#moleculer-io)
-- [Features](#features)
-- [Install](#install) -->
+<h1>Table of contents</h1>
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
 - [Usage](#usage)
 	- [Init server](#init-server)
 	- [Handle socket events](#handle-socket-events)
 	- [Handle multiple events](#handle-multiple-events)
+	- [Aliases](#aliases)
+		- [Mapping policy](#mapping-policy)
 	- [Custom handler](#custom-handler)
 	- [Handler hooks](#handler-hooks)
 	- [Calling options](#calling-options)
@@ -41,6 +40,8 @@ $ npm install moleculer-io
 	- [Full settings](#full-settings)
 - [Change logs](#change-logs)
 - [License](#license)
+
+<!-- /TOC -->
 
 # Usage
 
@@ -612,6 +613,10 @@ settings: {
 
 # Change logs
 **1.0.3**: Add `aliases` and `mappingPolicy` event properties.
+
+**1.0.2**: `socketAuthorize` method can return the user now. Add `socketSaveUser` method.
+
+**1.0.1**: Bug fix.
 
 **1.0.0**: See [Migrate to 1.x](migration_to_v1.md).
 
