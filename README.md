@@ -183,6 +183,73 @@ broker.createService({
 })
 ```
 
+## Aliases
+
+You can use alias names instead of action names.
+
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings: {
+    port: 3000,
+    io: {
+      namespaces: {
+        '/': {
+          events: {
+            'call': {
+              aliases: {
+                'add': 'math.add'
+              },
+              whitelist: [
+                'math.add'
+              ],
+              callOptions: {}
+            }
+          }
+        }
+      }
+    }
+  }
+})
+```
+
+Then doing `socket.emit('call','math.add', {a:25, b:13}, callback)` on the client side
+will be equivalent to `socket.emit('call','add', {a:25, b:13}, callback)`.
+
+### Mapping policy
+
+The `event` has a `mappingPolicy` property to handle events without aliases.
+
+*Available options:*
+* `all` - enable to handle all actions with or without aliases (default)
+* `restrict` - enable to handle only the actions with aliases
+
+```javascript
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings: {
+    port: 3000,
+    io: {
+      namespaces: {
+        '/': {
+          events: {
+            'call': {
+              mappingPolicy: 'restrict',
+              aliases: {
+                'add': 'math.add'
+              },
+              callOptions: {}
+            }
+          }
+        }
+      }
+    }
+  }
+})
+```
+
 ## Custom handler
 
 You can make use of custom functions within the declaration of event handler.
@@ -521,6 +588,10 @@ settings: {
         packetMiddlewares:[],
         events: {
           call: {
+            mappingPolicy: 'all',
+            aliases: {
+              'add': 'math.add'
+            },
             whitelist: [
               'math.*'
             ],
@@ -540,6 +611,8 @@ settings: {
 ```
 
 # Change logs
+**1.0.3**: Add `aliases` and `mappingPolicy` event properties.
+
 **1.0.0**: See [Migrate to 1.x](migration_to_v1.md).
 
 **0.13.4**: Fix bug of multiple custom event handler.
