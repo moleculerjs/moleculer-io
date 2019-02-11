@@ -97,9 +97,9 @@ module.exports = {
       return new Promise((resolve, reject)=>{
         this.io.close(err=>{
           // if (err)
-			    //   return reject(err) //Ignore this error
-					this.logger.info("Socket.io API Gateway stopped!")
-					resolve()
+          //   return reject(err) //Ignore this error
+          this.logger.info("Socket.io API Gateway stopped!")
+          resolve()
         })
       })
     }
