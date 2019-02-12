@@ -194,6 +194,22 @@ module.exports = {
           namespace.emit(ctx.params.event)
         }
       }
+    },
+    getClients:{
+      params: {
+        namespace: {type: 'string', optional: true},
+        room: 'string'
+      },
+      handler(ctx){
+        return new Promise((resolve, reject)=> {
+          this.io.of(ctx.params.namespaces || '/').to(ctx.params.room).clients((err, clients)=>{
+            if(err){
+              return reject(err)
+            }
+            resolve(clients)
+          })
+        })
+      }
     }
   },
   methods: {
