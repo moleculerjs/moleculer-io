@@ -615,6 +615,10 @@ settings: {
 ```
 
 # Change logs
+**1.0.5**: Bug fix.
+
+**1.0.4**: Bug fix.
+
 **1.0.3**: Add `aliases` and `mappingPolicy` event properties.
 
 **1.0.2**: `socketAuthorize` method can return the user now. Add `socketSaveUser` method.
