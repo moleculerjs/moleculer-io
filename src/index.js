@@ -188,7 +188,11 @@ module.exports = {
             namespace = namespace.to(room)
           }
         }
-        namespace.emit(ctx.params.event,...ctx.params.args)
+        if(ctx.params.args){
+          namespace.emit(ctx.params.event,...ctx.params.args)
+        }else{
+          namespace.emit(ctx.params.event)
+        }
       }
     }
   },
