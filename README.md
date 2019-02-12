@@ -561,6 +561,9 @@ in depth explanation of this concept, and additional steps that have to be taken
 In order to interconnect this service with other services, start the service with an adapter:
 
 ```javascript
+const broker = new ServiceBroker({
+    transporter: "redis://redis:6379"
+})
 broker.createService({
   name: 'io',
   mixins: [SocketIOService],
@@ -568,10 +571,7 @@ broker.createService({
     port: 3000,
     io: {
       options: {
-        adapter: require("socket.io-redis")({
-          host: 'redis',
-          port: 6379
-        })
+        adapter: require("socket.io-redis")("redis://redis:6379")
       }
     }
   }
