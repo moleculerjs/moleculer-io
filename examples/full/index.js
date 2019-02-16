@@ -19,6 +19,20 @@ const broker = new ServiceBroker({
 })
 
 broker.createService({
+  name: 'say',
+  actions: {
+    hello:{
+      params: {
+        name: { type: 'string', min: 2 },
+      },
+      handler(ctx){
+        return `${ctx.params.name} hello`
+      }
+    }
+  }
+})
+
+broker.createService({
 	name: "math",
 	actions: {
     add:{
@@ -103,6 +117,7 @@ const ioService = broker.createService({
             'call':{
               whitelist: [
                 'math.*',
+                'say.*',
                 'accounts.*',
                 'rooms.*',
                 'io.*'

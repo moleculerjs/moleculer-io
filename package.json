@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "babel src -d lib --watch",
     "example": "npm install && node examples/simple/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "ava",
     "compile": "babel -d lib/ src/",
     "prepare": "npm run compile"
   },
@@ -31,12 +31,14 @@
     "socket.io": "^2.2.0"
   },
   "devDependencies": {
+    "ava": "^1.2.1",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "express": "^4.16.3",
     "fs-extra": "^7.0.1",
     "moleculer": "^0.13.5",
     "moleculer-web": "^0.8.5",
+    "socket.io-client": "^2.2.0",
     "socket.io-redis": "^5.2.0"
   }
 }
