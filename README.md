@@ -615,6 +615,8 @@ settings: {
 ```
 
 # Change logs
+**1.0.7**: Add `settings.server` options.
+
 **1.0.6**: Set the babel targets.node to 'current'
 
 **1.0.5**: Bug fix.
