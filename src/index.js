@@ -95,12 +95,18 @@ module.exports = {
   stopped(){
     if(this.io){
       return new Promise((resolve, reject)=>{
-        this.io.close(err=>{
-          // if (err)
-          //   return reject(err) //Ignore this error
-          this.logger.info("Socket.io API Gateway stopped!")
+        try{
+          this.io.close(err=>{
+            // if (err)
+              // this.logger.error(e)
+              // return reject(err) //Ignore this error
+            this.logger.info("Socket.io API Gateway stopped!")
+            resolve()
+          })
+        }catch(e){
+          // this.logger.error(e)
           resolve()
-        })
+        }
       })
     }
   },
@@ -219,7 +225,7 @@ module.exports = {
         srv = null;
       }
       opts = opts || this.settings.io.options
-      srv = srv || this.server || this.settings.port
+      srv = srv || this.server || (this.settings.server ? this.settings.port : undefined)
       this.io = new IO(srv, opts)
     },
     socketGetMeta(socket){
