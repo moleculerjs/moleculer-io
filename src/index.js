@@ -243,8 +243,8 @@ module.exports = {
       socket.client.user = user
     },
     socketOnError(err, respond){
-      const errDebug = _.pick(err, ["name", "message", "code", "type", "data", "stack"]));
-      this.logger.debug('onIOError', errDebug);
+      const errDebug = _.pick(err, ["name", "message", "code", "type", "data", "stack"])
+      this.logger.debug('socketOnError:', errDebug);
       const errObj = _.pick(err, ["name", "message", "code", "type", "data"]);
       return respond(errObj)
     },
