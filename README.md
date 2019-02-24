@@ -416,8 +416,6 @@ broker.createService({
   }
 })
 ```
-Tips: `socket.$service` is pointed to service instance, if you want to call an action to validate the token, you can do it via `socket.$service.broker.call()`
-
 Client:
 
 ```javascript
