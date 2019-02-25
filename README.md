@@ -398,56 +398,24 @@ broker.createService({
   },
   methods: {
     // Second thing
-    socketAuthorize(socket, eventHandler){
+    async socketAuthorize(socket, eventHandler){
       let accessToken = socket.handshake.query.token
       if (accessToken) {
-        if (accessToken === "12345") {
-        // valid credential, return the user
-          return Promise.resolve({ id: 1, detail: "You are authorized using token.", name: "John Doe" })
-        } else {
-        // invalid credentials
-          return Promise.reject()
+        try{
+          let user = await this.broker.call("user.verifyToken", {accessToken})
+          return {id: user.id, email: user.email, token: accessToken}  // valid credential, return the user
+        }catch(err){
+          throw new UnAuthorizedError() // invalid credentials
         }
       } else {
-      // anonymous user
-        return Promise.resolve()
+        // anonymous user
+        return
       }
     }
   }
 })
 ```
-Or, you can call some action to verify token
-```javascript
-const {UnAuthorizedError} = ApiGateway.Errors;
 
-broker.createService({
-  ...
-  ...
-  methods: {
-    // Second thing
-    socketAuthorize(socket, eventHandler){
-      return Promise.resolve(socket.handshake.query.token)
-	.then(token => {
-	    if (token) {
-		return this.broker.call("user.verifyToken", {token})
-		    .then(user => {
-			return {id: user.id, email: user.email, token};
-		    })
-		    .catch(() => {
-			return null;
-		    });
-	    }
-	})
-	.then(user => {
-	    if (!user)
-		return Promise.reject(new UnAuthorizedError());
-	    else
-		return Promise.resolve(user);
-	});
-    }
-  }
-})
-```
 Client:
 
 ```javascript
