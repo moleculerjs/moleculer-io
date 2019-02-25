@@ -614,6 +614,8 @@ settings: {
 ```
 
 # Change logs
+**1.0.9**: Fix [#17](https://github.com/tiaod/moleculer-io/issues/17)
+
 **1.0.8**: Fix [#12](https://github.com/tiaod/moleculer-io/issues/12)
 
 **1.0.7**: Add `settings.server` options.
