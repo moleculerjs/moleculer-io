@@ -23,7 +23,27 @@ $ npm install moleculer-io
 ```
 
 <h1>Table of contents</h1>
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
+- [Usage](#usage)
+	- [Init server](#init-server)
+	- [Handle socket events](#handle-socket-events)
+	- [Handle multiple events](#handle-multiple-events)
+	- [Aliases](#aliases)
+		- [Mapping policy](#mapping-policy)
+	- [Custom handler](#custom-handler)
+	- [Handler hooks](#handler-hooks)
+	- [Calling options](#calling-options)
+	- [Middlewares](#middlewares)
+	- [Authorization](#authorization)
+	- [Joining and leaving rooms](#joining-and-leaving-rooms)
+	- [Broadcast](#broadcast)
+	- [Using multiple instances](#using-multiple-instances)
+	- [Full settings](#full-settings)
+- [Change logs](#change-logs)
+- [License](#license)
+
+<!-- /TOC -->
 
 
 # Usage
