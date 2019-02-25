@@ -9,6 +9,7 @@ module.exports = {
   name: 'io',
   settings: {
     // port: 3000,
+    server: true,
     io: {
       // options: {}, //socket.io options
       namespaces: {
