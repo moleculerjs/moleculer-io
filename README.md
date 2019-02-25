@@ -426,7 +426,7 @@ broker.createService({
   methods: {
     // Second thing
     socketAuthorize(socket, eventHandler){
-      return this.Promise.resolve(socket.handshake.query.token)
+      return Promise.resolve(socket.handshake.query.token)
 	.then(token => {
 	    if (token) {
 		return this.broker.call("user.verifyToken", {token})
@@ -440,9 +440,9 @@ broker.createService({
 	})
 	.then(user => {
 	    if (!user)
-		return this.Promise.reject(new UnAuthorizedError());
+		return Promise.reject(new UnAuthorizedError());
 	    else
-		return this.Promise.resolve(user);
+		return Promise.resolve(user);
 	});
     }
   }
