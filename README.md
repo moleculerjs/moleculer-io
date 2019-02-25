@@ -416,6 +416,41 @@ broker.createService({
   }
 })
 ```
+Or, you can call some action to verify token
+```javascript
+const {UnAuthorizedError} = ApiGateway.Errors;
+
+broker.createService({
+  ...
+  ...
+  methods: {
+    // Second thing
+    socketAuthorize(socket, eventHandler){
+      return this.Promise.resolve(socket.handshake.query.token)
+	.then(token => {
+	    if (token) {
+		return ctx.call("user.verifyToken", {token})
+		    .then(user => {
+			if (user) {
+			    this.logger.debug("Authenticated");
+			    ctx.meta.user = { id: user.id, email: user.email};
+			    ctx.meta.token = token;
+			}
+			return user;
+		    })
+		    .catch(() => {
+			return null;
+		    });
+	    }
+	})
+	.then(user => {
+	    if (!user)
+		return this.Promise.reject(new UnAuthorizedError());
+	});
+    }
+  }
+})
+```
 Client:
 
 ```javascript
