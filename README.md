@@ -38,6 +38,7 @@ $ npm install moleculer-io
 	- [Authorization](#authorization)
 	- [Joining and leaving rooms](#joining-and-leaving-rooms)
 	- [Broadcast](#broadcast)
+	- [CORS](#cors)
 	- [Using multiple instances](#using-multiple-instances)
 	- [Full settings](#full-settings)
 - [Change logs](#change-logs)
@@ -550,6 +551,27 @@ broker.call('io.broadcast', {
 
 Note: You should change the 'io' to the service name you created.
 
+## CORS
+`moleculer-io` will pick the `settings.cors.origin` option and use it to validate the request. (Which is also compatible with `moleculer-web`! )
+
+```js
+broker.createService({
+  name: 'io',
+  mixins: [ApiGateway, SocketIOService],
+  settings:{
+		cors: {
+			origin: ["http://example.com"], //Moleculer-io only pick up this option and set it to io.origins()
+			methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
+			allowedHeaders: [],
+			exposedHeaders: [],
+			credentials: false,
+			maxAge: 3600
+		}
+	}
+})
+```
+For detail see https://socket.io/docs/server-api/#server-origins-fn
+
 ## Using multiple instances
 
 If you plan for a highly available setup (launching multiple instances of this service behind a Load Balancer),
@@ -614,6 +636,8 @@ settings: {
 ```
 
 # Change logs
+**1.1.0**: Add cors config
+
 **1.0.9**: Fix [#17](https://github.com/tiaod/moleculer-io/issues/17)
 
 **1.0.8**: Fix [#12](https://github.com/tiaod/moleculer-io/issues/12)

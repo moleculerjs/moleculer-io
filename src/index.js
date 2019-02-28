@@ -225,8 +225,22 @@ module.exports = {
         opts = srv;
         srv = null;
       }
-      opts = opts || this.settings.io.options
+      opts = opts || this.settings.io.options || {}
       srv = srv || this.server || (this.settings.server ? this.settings.port : undefined)
+      if(this.settings.cors && this.settings.cors.origin && !opts.origins){ // cors settings
+        opts.origins = (function(origin, callback){
+          if (!this.settings.cors.origin || this.settings.cors.origin === "*") {
+            this.logger.debug(`origin ${origin} is allowed.`)
+            callback(null, true)
+					} else if ((this.checkOrigin || checkOrigin)(origin, this.settings.cors.origin)) {
+            this.logger.debug(`origin ${origin} is allowed by checkOrigin.`)
+						callback(null, true)
+					} else {
+            this.logger.debug(`origin ${origin} is not allowed.`)
+						return callback('origin not allowed', false);
+					}
+        }).bind(this)
+      }
       this.io = new IO(srv, opts)
     },
     socketGetMeta(socket){
@@ -284,6 +298,28 @@ function checkWhitelist(action, whitelist){
       return mask.test(action)
     }
   }) != null
+}
+
+function checkOrigin(origin, settings) {
+	if (_.isString(settings)) {
+		if (settings.indexOf(origin) !== -1)
+			return true;
+
+		if (settings.indexOf("*") !== -1) {
+			// Based on: https://github.com/hapijs/hapi
+			// eslint-disable-next-line
+			const wildcard = new RegExp(`^${_.escapeRegExp(settings).replace(/\\\*/g, ".*").replace(/\\\?/g, ".")}$`)
+			return origin.match(wildcard);
+		}
+	} else if (Array.isArray(settings)) {
+		for(let i = 0; i < settings.length; i++) {
+			if (checkOrigin(origin, settings[i])) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 function makeAuthorizeMiddleware(svc, handlerItem){
