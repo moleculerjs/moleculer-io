@@ -165,7 +165,7 @@ module.exports = {
         }
         if(ctx.meta.$leave){
           if(_.isArray(ctx.meta.$leave)){
-            await Promise.all(ctx.meta.$leave.map(room=>this.leaveRoom(socket, room)))
+            await Promise.all(ctx.meta.$leave.map(room=>this.socketLeaveRoom(socket, room)))
           }else{
             await this.socketLeaveRoom(socket, ctx.meta.$leave)
           }

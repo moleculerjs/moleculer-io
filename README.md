@@ -636,6 +636,8 @@ settings: {
 ```
 
 # Change logs
+**1.1.1**: Fix [#18](https://github.com/tiaod/moleculer-io/issues/18)
+
 **1.1.0**: Add cors config
 
 **1.0.9**: Fix [#17](https://github.com/tiaod/moleculer-io/issues/17)
