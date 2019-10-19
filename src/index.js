@@ -17,6 +17,7 @@ module.exports = {
           // authorization: false,
           // middlewares: [],
           // packetMiddlewares:[],
+          // notification: false,
           events: {
             call: {
               // whitelist: [],
@@ -89,6 +90,15 @@ module.exports = {
         for(let eventName in handlers){
           socket.on(eventName, handlers[eventName])
         }
+        if (item.notification) {
+          this.socketNotification('connected', socket, nsp);
+        }
+        socket.on('disconnect', () => {
+          this.logger.info(`(nsp:'${nsp}') Client disconnected:`,socket.id)
+          if (item.notification) {
+            this.socketNotification('disconnected', socket, nsp);
+          }
+        })
       })
     }
     this.logger.info('Socket.io API Gateway started.')
@@ -272,6 +282,15 @@ module.exports = {
           }
         })
       })
+    },
+    socketNotification(eventName, socket, nsp){
+      let params = {
+        socket: socket.id,
+        meta: this.socketGetMeta(socket)
+      }
+      let event = 'io.' + eventName + (nsp !== '/' ? '.' + nsp.substring(1, nsp.length) : '')
+      this.logger.debug('Broadcasting event:', event, params)
+      this.broker.broadcast(event,params);
     },
   }
 }
