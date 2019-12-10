@@ -126,19 +126,21 @@ module.exports = {
           this.logger.debug(`Service "${action}" not in whitelist`)
           throw new ServiceNotFoundError({action})
         }
+        // get callOptions
+        let opts = _.assign({
+          meta: this.socketGetMeta(socket)
+        }, handlerItem.callOptions)
+
         // Check endpoint visibility
-        const endpoint = this.broker.findNextActionEndpoint(action)
+        const endpoint = this.broker.findNextActionEndpoint(action, opts, ctx)
         if (endpoint instanceof Error)
           throw endpoint
         if (endpoint.action.visibility != null && endpoint.action.visibility != "published") {
           // Action can't be published
           throw new ServiceNotFoundError({ action })
         }
-        // get callOptions
-        let opts = _.assign({
-          meta: this.socketGetMeta(socket)
-        }, handlerItem.callOptions)
-        this.logger.debug('Call action:', action, params, opts)
+
+	this.logger.debug('Call action:', action, params, opts)
         if(handlerItem.onBeforeCall){
           await handlerItem.onBeforeCall.call(this, ctx, socket, action, params, opts)
         }
