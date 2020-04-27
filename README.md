@@ -636,6 +636,8 @@ settings: {
 ```
 
 # Change logs
+**1.1.3**: Merge [#27](https://github.com/tiaod/moleculer-io/pull/27)
+
 **1.1.1**: Fix [#18](https://github.com/tiaod/moleculer-io/issues/18)
 
 **1.1.0**: Add cors config
