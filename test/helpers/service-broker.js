@@ -103,4 +103,29 @@ broker.createService({
   }
 })
 
+broker.createService({
+  name: 'rooms',
+  actions: {
+    join: {
+      params: {
+        join: { type: 'string', min: 2 },
+      },
+      handler(ctx) {
+        ctx.meta.$join = ctx.params.join
+      }
+    },
+    leave:{
+      params: {
+        leave: { type: 'string', min: 2 },
+      },
+      handler(ctx){
+        ctx.meta.$leave = ctx.params.leave
+      }
+    },
+    get(ctx){
+      return ctx.meta.$rooms
+    }
+  }
+})
+
 export default broker

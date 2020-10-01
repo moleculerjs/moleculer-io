@@ -35,3 +35,19 @@ test('call published actions', async t=>{
 test('action name not string', async t=>{
   await t.throwsAsync(()=>t.context.call(222, 'wtf'), { name: 'BadRequestError', message: 'Bad Request'})
 })
+
+test("run plan join/leave rooms", async (t) => {
+  t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id])
+
+  await t.context.call("rooms.join", { join: "room-01" });
+  t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id, 'room-01']);
+
+  await t.context.call("rooms.join", { join: "room-02" });
+  t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id, 'room-01', 'room-02']);
+
+  await t.context.call("rooms.leave", { leave: "room-01" });
+  t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id, 'room-02']);
+  
+  await t.context.call("rooms.leave", { leave: "room-02" });
+  t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id]);
+});

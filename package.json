@@ -26,20 +26,27 @@
   "author": "tiaod",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^2.4.1",
-    "lodash": "^4.17.11",
-    "socket.io": "^2.2.0"
+    "chalk": "4.1.0",
+    "lodash": "4.17.20",
+    "socket.io": "2.3.0"
   },
   "devDependencies": {
-    "ava": "^1.2.1",
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.7.0",
-    "express": "^4.16.3",
-    "fs-extra": "^7.0.1",
-    "moleculer": "^0.13.5",
-    "moleculer-web": "^0.8.5",
-    "socket.io-client": "^2.2.0",
-    "socket.io-redis": "^5.2.0",
-    "winston": "^3.2.1"
+    "@ava/babel": "1.0.1",
+    "ava": "3.12.1",
+    "babel-cli": "6.26.0",
+    "babel-preset-env": "1.7.0",
+    "express": "4.17.1",
+    "fs-extra": "9.0.1",
+    "moleculer": "0.14.10",
+    "moleculer-web": "0.9.1",
+    "socket.io-client": "2.3.0",
+    "socket.io-redis": "5.4.0",
+    "winston": "3.3.3"
+  },
+  "ava": {
+    "require": [
+      "babel-register"
+    ],
+    "babel": true
   }
 }
