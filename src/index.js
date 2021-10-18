@@ -3,7 +3,7 @@ const _ = require("lodash");
 const { match } = require("moleculer").Utils;
 const { ServiceNotFoundError } = require("moleculer").Errors;
 const { BadRequestError } = require("./errors");
-const chalk = require("chalk");
+const kleur = require("kleur");
 
 module.exports = {
 	name: "io",
@@ -437,7 +437,7 @@ function makeHandler(svc, handlerItem) {
 				params = null;
 			}
 			let res = await svc.actions.call({ socket: this, action, params, handlerItem });
-			svc.logger.info(`   <= ${chalk.green.bold("Success")} ${action}`);
+			svc.logger.info(`   <= ${kleur.green().bold("Success")} ${action}`);
 			if (_.isFunction(respond)) respond(null, res);
 		} catch (err) {
 			if (svc.settings.log4XXResponses || (err && !_.inRange(err.code, 400, 500))) {
