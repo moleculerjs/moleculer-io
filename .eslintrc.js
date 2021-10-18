@@ -22,8 +22,6 @@ module.exports = {
 		"security/detect-object-injection": ["off"],
 		"security/detect-non-literal-require": ["off"],
 		"security/detect-non-literal-fs-filename": ["off"],
-		"no-process-exit": ["off"],
 		"node/no-unpublished-require": 0
-	},
-	ignorePatterns: ["benchmark/test.js", "test/typescript/hello-world/out/*.js"]
+	}
 };
