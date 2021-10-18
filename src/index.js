@@ -1,4 +1,4 @@
-const IO = require("socket.io");
+const { Server: IO } = require("socket.io");
 const _ = require("lodash");
 const { match } = require("moleculer").Utils;
 const { ServiceNotFoundError } = require("moleculer").Errors;
@@ -280,7 +280,7 @@ module.exports = {
 		socketGetMeta(socket) {
 			let meta = {
 				user: socket.client.user,
-				$rooms: Object.keys(socket.rooms)
+				$rooms: Array.from(socket.rooms.keys())
 			};
 			this.logger.debug("getMeta", meta);
 			return meta;
@@ -325,15 +325,7 @@ module.exports = {
 		 */
 		socketJoinRooms(socket, rooms) {
 			this.logger.debug(`socket ${socket.id} join room:`, rooms);
-			return new Promise(function (resolve, reject) {
-				socket.join(rooms, err => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve();
-					}
-				});
-			});
+			socket.join(rooms);
 		},
 
 		/**
@@ -343,15 +335,8 @@ module.exports = {
 		 * @returns
 		 */
 		socketLeaveRoom(socket, room) {
-			return new Promise(function (resolve, reject) {
-				socket.leave(room, err => {
-					if (err) {
-						reject(err);
-					} else {
-						resolve();
-					}
-				});
-			});
+			this.logger.debug(`socket ${socket.id} leave room:`, room);
+			socket.leave(room);
 		}
 	}
 };

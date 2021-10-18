@@ -3,6 +3,8 @@
 const { ServiceBroker } = require("moleculer");
 const SocketIOService = require("../../");
 
+const { Duplex } = require("stream");
+
 const broker = new ServiceBroker();
 
 const ioService = broker.createService({
@@ -38,6 +40,7 @@ const ioService = broker.createService({
 							},
 							onAfterCall: async function (ctx, socket, res) {
 								console.log("after hook", res);
+								return res;
 							}
 							// callOptions:{}
 						},

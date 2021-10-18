@@ -1,4 +1,6 @@
-![LOGO](https://raw.githubusercontent.com/moleculerjs/moleculer-io/master/examples/full/public/logo.png)
+[![Moleculer logo](http://moleculer.services/images/banner.png)](https://github.com/moleculerjs/moleculer)
+
+[![CI test](https://github.com/moleculerjs/moleculer-io/actions/workflows/ci.yml/badge.svg)](https://github.com/moleculerjs/moleculer-io/actions/workflows/ci.yml)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/moleculerjs/moleculer-io/master/LICENSE)
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 [![Known Vulnerabilities](https://snyk.io/test/github/moleculerjs/moleculer-io/badge.svg)](https://snyk.io/test/github/moleculerjs/moleculer-io)
