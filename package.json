@@ -27,8 +27,8 @@
   "license": "MIT",
   "dependencies": {
     "chalk": "^2.4.1",
-    "lodash": "^4.17.11",
-    "socket.io": "^2.2.0"
+    "lodash": "^4.17.21",
+    "socket.io": "^2.4.1"
   },
   "devDependencies": {
     "ava": "^1.2.1",
@@ -36,8 +36,8 @@
     "babel-preset-env": "^1.7.0",
     "express": "^4.16.3",
     "fs-extra": "^7.0.1",
-    "moleculer": "^0.13.5",
-    "moleculer-web": "^0.8.5",
+    "moleculer": "^0.14.17",
+    "moleculer-web": "^0.10.3",
     "socket.io-client": "^2.2.0",
     "socket.io-redis": "^5.2.0",
     "winston": "^3.2.1"
