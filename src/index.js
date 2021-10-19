@@ -38,15 +38,15 @@ module.exports = {
 	},
 
 	created() {
-		let handlers = {};
-		let namespaces = this.settings.io.namespaces;
-		for (let nsp in namespaces) {
-			let item = namespaces[nsp];
+		const handlers = {};
+		const namespaces = this.settings.io.namespaces;
+		for (const nsp in namespaces) {
+			const item = namespaces[nsp];
 			this.logger.debug("Add route:", item);
 			if (!handlers[nsp]) handlers[nsp] = {};
-			let events = item.events;
-			for (let event in events) {
-				let handler = events[event];
+			const events = item.events;
+			for (const event in events) {
+				const handler = events[event];
 				if (typeof handler === "function") {
 					//custom handler
 					handlers[nsp][event] = handler;
@@ -62,10 +62,10 @@ module.exports = {
 		if (!this.io) {
 			this.initSocketIO();
 		}
-		let namespaces = this.settings.io.namespaces;
-		for (let nsp in namespaces) {
-			let item = namespaces[nsp];
-			let namespace = this.io.of(nsp);
+		const namespaces = this.settings.io.namespaces;
+		for (const nsp in namespaces) {
+			const item = namespaces[nsp];
+			const namespace = this.io.of(nsp);
 			if (item.authorization) {
 				this.logger.debug(`Add authorization to handler:`, item);
 				if (!_.isFunction(this.socketAuthorize)) {
@@ -80,26 +80,26 @@ module.exports = {
 			}
 			if (item.middlewares) {
 				//Server middlewares
-				for (let middleware of item.middlewares) {
+				for (const middleware of item.middlewares) {
 					namespace.use(middleware.bind(this));
 				}
 			}
-			let handlers = this.settings.io.handlers[nsp];
+			const handlers = this.settings.io.handlers[nsp];
 			namespace.on("connection", socket => {
 				socket.$service = this;
 				this.logger.info(`(nsp:'${nsp}') Client connected:`, socket.id);
 				if (item.packetMiddlewares) {
 					//socketmiddlewares
-					for (let middleware of item.packetMiddlewares) {
+					for (const middleware of item.packetMiddlewares) {
 						socket.use(middleware.bind(this));
 					}
 				}
-				for (let eventName in handlers) {
+				for (const eventName in handlers) {
 					socket.on(eventName, handlers[eventName]);
 				}
 			});
 		}
-		this.logger.info("Socket.io API Gateway started.");
+		this.logger.info("Socket.IO API Gateway started.");
 	},
 
 	stopped() {
@@ -121,12 +121,9 @@ module.exports = {
 					throw new BadRequestError();
 				}
 				// Handle aliases
-				let aliased = false;
-				const original = action;
 				if (handlerItem.aliases) {
 					const alias = handlerItem.aliases[action];
 					if (alias) {
-						aliased = true;
 						action = alias;
 					} else if (handlerItem.mappingPolicy === "restrict") {
 						throw new ServiceNotFoundError({ action });
@@ -140,7 +137,7 @@ module.exports = {
 					throw new ServiceNotFoundError({ action });
 				}
 				// get callOptions
-				let opts = _.assign(
+				const opts = _.assign(
 					{
 						meta: this.socketGetMeta(socket)
 					},
@@ -204,7 +201,7 @@ module.exports = {
 				if (ctx.params.volate) namespace = namespace.volate;
 				if (ctx.params.local) namespace = namespace.local;
 				if (ctx.params.rooms) {
-					for (let room of ctx.params.rooms) {
+					for (const room of ctx.params.rooms) {
 						namespace = namespace.to(room);
 					}
 				}
@@ -278,7 +275,7 @@ module.exports = {
 		 * @returns
 		 */
 		socketGetMeta(socket) {
-			let meta = {
+			const meta = {
 				user: socket.client.user,
 				$rooms: Array.from(socket.rooms.keys())
 			};
@@ -395,7 +392,7 @@ function checkOrigin(origin, settings) {
 function makeAuthorizeMiddleware(svc, handlerItem) {
 	return async function authorizeMiddleware(socket, next) {
 		try {
-			let res = await svc.socketAuthorize(socket, handlerItem);
+			const res = await svc.socketAuthorize(socket, handlerItem);
 			if (res) svc.socketSaveUser(socket, res);
 			next();
 		} catch (e) {
@@ -421,7 +418,7 @@ function makeHandler(svc, handlerItem) {
 				respond = params;
 				params = null;
 			}
-			let res = await svc.actions.call({ socket: this, action, params, handlerItem });
+			const res = await svc.actions.call({ socket: this, action, params, handlerItem });
 			svc.logger.info(`   <= ${kleur.green().bold("Success")} ${action}`);
 			if (_.isFunction(respond)) respond(null, res);
 		} catch (err) {

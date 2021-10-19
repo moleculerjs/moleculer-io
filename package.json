@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "node examples/simple/index.js",
     "ci": "jest --watch",
-    "test": "jest --coverage"
+    "test": "jest --coverage --forceExit --detectOpenHandles"
   },
   "repository": {
     "type": "git",
