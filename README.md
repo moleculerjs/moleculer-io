@@ -1,7 +1,9 @@
-![LOGO](https://raw.githubusercontent.com/tiaod/moleculer-io/master/examples/full/public/logo.png)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/tiaod/moleculer-io/master/LICENSE)
+[![Moleculer logo](http://moleculer.services/images/banner.png)](https://github.com/moleculerjs/moleculer)
+
+[![CI test](https://github.com/moleculerjs/moleculer-io/actions/workflows/ci.yml/badge.svg)](https://github.com/moleculerjs/moleculer-io/actions/workflows/ci.yml)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/moleculerjs/moleculer-io/master/LICENSE)
 [![npm](https://img.shields.io/npm/v/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
-[![Known Vulnerabilities](https://snyk.io/test/github/tiaod/moleculer-io/badge.svg)](https://snyk.io/test/github/tiaod/moleculer-io)
+[![Known Vulnerabilities](https://snyk.io/test/github/moleculerjs/moleculer-io/badge.svg)](https://snyk.io/test/github/moleculerjs/moleculer-io)
 [![Downloads](https://img.shields.io/npm/dm/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 <h1>Moleculer-io</h1>
 
@@ -26,21 +28,21 @@ $ npm install moleculer-io
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [Usage](#usage)
-	- [Init server](#init-server)
-	- [Handle socket events](#handle-socket-events)
-	- [Handle multiple events](#handle-multiple-events)
-	- [Aliases](#aliases)
-		- [Mapping policy](#mapping-policy)
-	- [Custom handler](#custom-handler)
-	- [Handler hooks](#handler-hooks)
-	- [Calling options](#calling-options)
-	- [Middlewares](#middlewares)
-	- [Authorization](#authorization)
-	- [Joining and leaving rooms](#joining-and-leaving-rooms)
-	- [Broadcast](#broadcast)
-	- [CORS](#cors)
-	- [Using multiple instances](#using-multiple-instances)
-	- [Full settings](#full-settings)
+  - [Init server](#init-server)
+  - [Handle socket events](#handle-socket-events)
+  - [Handle multiple events](#handle-multiple-events)
+  - [Aliases](#aliases)
+    - [Mapping policy](#mapping-policy)
+  - [Custom handler](#custom-handler)
+  - [Handler hooks](#handler-hooks)
+  - [Calling options](#calling-options)
+  - [Middlewares](#middlewares)
+  - [Authorization](#authorization)
+  - [Joining and leaving rooms](#joining-and-leaving-rooms)
+  - [Broadcast](#broadcast)
+  - [CORS](#cors)
+  - [Using multiple instances](#using-multiple-instances)
+  - [Full settings](#full-settings)
 - [Change logs](#change-logs)
 - [License](#license)
 
@@ -636,15 +638,15 @@ settings: {
 ```
 
 # Change logs
-**1.1.3**: Merge [#27](https://github.com/tiaod/moleculer-io/pull/27)
+**1.1.3**: Merge [#27](https://github.com/moleculerjs/moleculer-io/pull/27)
 
-**1.1.1**: Fix [#18](https://github.com/tiaod/moleculer-io/issues/18)
+**1.1.1**: Fix [#18](https://github.com/moleculerjs/moleculer-io/issues/18)
 
 **1.1.0**: Add cors config
 
-**1.0.9**: Fix [#17](https://github.com/tiaod/moleculer-io/issues/17)
+**1.0.9**: Fix [#17](https://github.com/moleculerjs/moleculer-io/issues/17)
 
-**1.0.8**: Fix [#12](https://github.com/tiaod/moleculer-io/issues/12)
+**1.0.8**: Fix [#12](https://github.com/moleculerjs/moleculer-io/issues/12)
 
 **1.0.7**: Add `settings.server` options.
 
