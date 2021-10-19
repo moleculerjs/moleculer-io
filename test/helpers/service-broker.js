@@ -5,7 +5,7 @@ const SocketIOService = require("../../");
 
 const { Duplex } = require("stream");
 
-const broker = new ServiceBroker();
+const broker = new ServiceBroker({ logLevel: "error" });
 
 const ioService = broker.createService({
 	name: "io",

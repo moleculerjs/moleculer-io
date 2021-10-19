@@ -1,12 +1,12 @@
-const test = require("ava");
 const io = require("socket.io-client");
 const broker = require("./helpers/service-broker");
 
-test.before(async t => {
+let socket, call;
+
+beforeAll(async () => {
 	await broker.start();
-	let socket = io("http://localhost:3000");
-	t.context.socket = socket;
-	t.context.call = function (action, params) {
+	socket = io("http://localhost:3000");
+	call = function (action, params) {
 		return new Promise(function (resolve, reject) {
 			socket.emit("call", action, params, function (err, res) {
 				if (err) {
@@ -22,34 +22,39 @@ test.before(async t => {
 	};
 });
 
-test.after(async t => {
+afterAll(async () => {
 	await broker.stop();
 });
 
-test("call published actions", async t => {
-	let res = await t.context.call("math.add", { a: 1, b: 2 });
-	t.true(res === 3);
-});
-
-test("action name not string", async t => {
-	await t.throwsAsync(() => t.context.call(222, "wtf"), {
-		name: "BadRequestError",
-		message: "Bad Request"
+describe("Test actions", () => {
+	it("call published actions", async () => {
+		const res = await call("math.add", { a: 1, b: 2 });
+		expect(res).toBe(3);
 	});
-});
 
-test("run plan join/leave rooms", async t => {
-	t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id]);
+	it("action name not string", async () => {
+		expect.assertions(2);
+		try {
+			await call(222, "wtf");
+		} catch (err) {
+			expect(err.name).toBe("BadRequestError");
+			expect(err.message).toBe("Bad Request");
+		}
+	});
 
-	await t.context.call("rooms.join", { join: "room-01" });
-	t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id, "room-01"]);
+	it("run plan join/leave rooms", async () => {
+		expect(await call("rooms.get")).toEqual([socket.id]);
 
-	await t.context.call("rooms.join", { join: "room-02" });
-	t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id, "room-01", "room-02"]);
+		await call("rooms.join", { join: "room-01" });
+		expect(await call("rooms.get")).toEqual([socket.id, "room-01"]);
 
-	await t.context.call("rooms.leave", { leave: "room-01" });
-	t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id, "room-02"]);
+		await call("rooms.join", { join: "room-02" });
+		expect(await call("rooms.get")).toEqual([socket.id, "room-01", "room-02"]);
 
-	await t.context.call("rooms.leave", { leave: "room-02" });
-	t.deepEqual(await t.context.call("rooms.get"), [t.context.socket.id]);
+		await call("rooms.leave", { leave: "room-01" });
+		expect(await call("rooms.get")).toEqual([socket.id, "room-02"]);
+
+		await call("rooms.leave", { leave: "room-02" });
+		expect(await call("rooms.get")).toEqual([socket.id]);
+	});
 });
