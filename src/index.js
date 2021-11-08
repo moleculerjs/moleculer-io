@@ -121,12 +121,9 @@ module.exports = {
 					throw new BadRequestError();
 				}
 				// Handle aliases
-				let aliased = false;
-				const original = action;
 				if (handlerItem.aliases) {
 					const alias = handlerItem.aliases[action];
 					if (alias) {
-						aliased = true;
 						action = alias;
 					} else if (handlerItem.mappingPolicy === "restrict") {
 						throw new ServiceNotFoundError({ action });
@@ -152,7 +149,7 @@ module.exports = {
 				if (endpoint instanceof Error) throw endpoint;
 				if (
 					endpoint.action.visibility != null &&
-					endpoint.action.visibility != "published"
+					endpoint.action.visibility !== "published"
 				) {
 					// Action can't be published
 					throw new ServiceNotFoundError({ action });
@@ -250,24 +247,12 @@ module.exports = {
 				opts = srv;
 				srv = null;
 			}
-			opts = opts || this.settings.io.options || {};
+			opts = _.cloneDeep(opts || this.settings.io.options || {});
 			srv = srv || this.server || (this.settings.server ? this.settings.port : undefined);
-			if (this.settings.cors && this.settings.cors.origin && !opts.origins) {
+
+			if (this.settings.cors && !opts.cors) {
 				// cors settings
-				opts.origins = function (origin, callback) {
-					if (!this.settings.cors.origin || this.settings.cors.origin === "*") {
-						this.logger.debug(`origin ${origin} is allowed.`);
-						callback(null, true);
-					} else if (
-						(this.checkOrigin || checkOrigin)(origin, this.settings.cors.origin)
-					) {
-						this.logger.debug(`origin ${origin} is allowed by checkOrigin.`);
-						callback(null, true);
-					} else {
-						this.logger.debug(`origin ${origin} is not allowed.`);
-						return callback("origin not allowed", false);
-					}
-				}.bind(this);
+				opts.cors = this.settings.cors;
 			}
 			this.io = new IO(srv, opts);
 		},
@@ -357,33 +342,6 @@ function checkWhitelist(action, whitelist) {
 			}
 		}) != null
 	);
-}
-
-/**
- *
- * @param {*} origin
- * @param {*} settings
- * @returns
- */
-function checkOrigin(origin, settings) {
-	if (_.isString(settings)) {
-		if (settings.indexOf(origin) !== -1) return true;
-
-		if (settings.indexOf("*") !== -1) {
-			// Based on: https://github.com/hapijs/hapi
-			// eslint-disable-next-line
-			const wildcard = new RegExp(`^${_.escapeRegExp(settings).replace(/\\\*/g, ".*").replace(/\\\?/g, ".")}$`)
-			return origin.match(wildcard);
-		}
-	} else if (Array.isArray(settings)) {
-		for (let i = 0; i < settings.length; i++) {
-			if (checkOrigin(origin, settings[i])) {
-				return true;
-			}
-		}
-	}
-
-	return false;
 }
 
 /**
