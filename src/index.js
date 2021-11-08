@@ -198,7 +198,7 @@ module.exports = {
 				if (ctx.params.namespace) {
 					namespace = namespace.of(ctx.params.namespace);
 				}
-				if (ctx.params.volate) namespace = namespace.volate;
+				if (ctx.params.volatile) namespace = namespace.volatile;
 				if (ctx.params.local) namespace = namespace.local;
 				if (ctx.params.rooms) {
 					for (let room of ctx.params.rooms) {
