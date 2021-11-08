@@ -61,3 +61,4 @@ typings/
 examples/**/upload/*
 !examples/**/upload/.gitkeep
 lib
+.idea
