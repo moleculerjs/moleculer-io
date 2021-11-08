@@ -45,7 +45,7 @@ declare module "moleculer-io" {
 	}
 
 	type NamespaceMiddlewareFunction = Parameters<Server["use"]>[0];
-	type SocketMiddlewareFunction = Parameters<Server["use"]>[0];
+	type SocketMiddlewareFunction = Parameters<Socket["use"]>[0];
 
 	interface IONamespace {
 		authorization?: boolean;
