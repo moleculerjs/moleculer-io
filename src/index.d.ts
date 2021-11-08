@@ -2,6 +2,8 @@ declare module "moleculer-io" {
 	import { Server, ServerOptions, Socket } from "socket.io";
 	import { Context, ServiceSchema, CallingOptions, ServiceMethods } from "moleculer";
 	import { ApiSettingsSchema } from "moleculer-web";
+	import * as http from "http";
+	import { SocketOptions } from "socket.io-client";
 
 	interface NamespaceEvent {
 		/**
@@ -65,6 +67,7 @@ declare module "moleculer-io" {
 		};
 	}
 
+	type InitSocketIOFunction = (srv: http.Server, opts: SocketOptions) => void;
 	type SocketAuthorizeFunction = <META = Record<any, any>>(
 		socket: Socket,
 		handlerItem: IONamespace
@@ -87,19 +90,20 @@ declare module "moleculer-io" {
 	type SocketLeaveRoomFunction = (socket: Socket, room: string) => void;
 
 	interface IOMethods extends ServiceMethods {
-		socketAuthorize?: SocketAuthorizeFunction;
-		socketGetMeta?: SocketGetMetaFunction;
+		initSocketIO: InitSocketIOFunction;
+		socketAuthorize: SocketAuthorizeFunction;
+		socketGetMeta: SocketGetMetaFunction;
 		/**
 		 * by default, will call socketSaveUser(socket, ctx.meta.user)
 		 */
-		socketSaveMeta?: SocketSaveMetaFunction;
+		socketSaveMeta: SocketSaveMetaFunction;
 		/**
 		 * by default, will set user to socket.client.user
 		 */
-		socketSaveUser?: SocketSaveUserFunction;
-		socketOnError?: SocketOnErrorFunction;
-		socketJoinRooms?: SocketJoinRoomsFunction;
-		socketLeaveRoom?: SocketLeaveRoomFunction;
+		socketSaveUser: SocketSaveUserFunction;
+		socketOnError: SocketOnErrorFunction;
+		socketJoinRooms: SocketJoinRoomsFunction;
+		socketLeaveRoom: SocketLeaveRoomFunction;
 	}
 	export interface IOServiceSchema
 		extends ServiceSchema<
@@ -107,7 +111,7 @@ declare module "moleculer-io" {
 				io?: IOSetting;
 			}
 		> {
-		methods: IOMethods & ThisType<IOServiceSchema>;
+		methods: Partial<IOMethods> & ThisType<IOServiceSchema>;
 	}
 
 	const SocketIOMixin: Partial<IOServiceSchema>;
