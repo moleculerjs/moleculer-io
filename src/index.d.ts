@@ -61,7 +61,7 @@ declare module "moleculer-io" {
 	}
 
 	export interface IOSetting {
-		options?: ServerOptions;
+		options?: Partial<ServerOptions>;
 		namespaces: {
 			[k: string]: IONamespace;
 		};
