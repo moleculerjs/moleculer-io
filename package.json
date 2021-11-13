@@ -48,5 +48,10 @@
   },
   "engines": {
     "node": ">= 10.x.x"
-  }
+  },
+  "files": [
+    "src",
+    "migration_to_v1.md",
+    "LICENSE"
+  ]
 }
