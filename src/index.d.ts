@@ -68,10 +68,10 @@ declare module "moleculer-io" {
 	}
 
 	type InitSocketIOFunction = (srv: http.Server, opts: SocketOptions) => void;
-	type SocketAuthorizeFunction = <META = Record<any, any>>(
+	type SocketAuthorizeFunction = <USER = unknown>(
 		socket: Socket,
 		handlerItem: IONamespace
-	) => Promise<META>;
+	) => Promise<USER | void>;
 	type SocketGetMetaFunction = <
 		META = {
 			user: any;
