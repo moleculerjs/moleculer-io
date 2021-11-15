@@ -48,6 +48,24 @@ declare module "moleculer-io" {
 
 	type NamespaceMiddlewareFunction = Parameters<Server["use"]>[0];
 	type SocketMiddlewareFunction = Parameters<Socket["use"]>[0];
+	/**
+	 * Custom event's handler as a function.<br>
+	 * Last params will be `response function` if client called `socket.emit('event', ..., aFunction(...){...})`.<br>
+	 *
+	 * @example {
+	 * 		events: {
+	 *			// callback (if exists) only accept 2 params: first is error, last is data
+	 *	     	example(arg1: string, arg2: number, response: (...data: any[]) => void) {
+	 *          	response(arg1, arg2)
+	 *          },
+	 *	     	exp2(arg1: string, arg2: number, callback: (err?: Error, ...data: any[]) => void) {
+	 *          	callback(null, arg1, arg2)
+	 *          },
+	 *      },
+	 * }
+	 * @see https://socket.io/docs/v4/server-api/#socketoneventname-callback
+	 */
+	type EventCustomFunction<T = unknown> = (...args: T[]) => void | Promise<void>;
 
 	interface IONamespace {
 		authorization?: boolean;
@@ -55,8 +73,8 @@ declare module "moleculer-io" {
 		packetMiddlewares?: SocketMiddlewareFunction[];
 
 		events: {
-			call: Partial<NamespaceEvent>;
-			[k: string]: Partial<NamespaceEvent>;
+			call: Partial<NamespaceEvent> | EventCustomFunction;
+			[k: string]: Partial<NamespaceEvent> | EventCustomFunction;
 		};
 	}
 
