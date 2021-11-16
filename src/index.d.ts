@@ -1,10 +1,31 @@
 declare module "moleculer-io" {
+	import { DefaultEventsMap, EventsMap } from "socket.io/dist/typed-events";
+	import { Client } from "socket.io/dist/client";
+
 	import { Server, ServerOptions, Socket } from "socket.io";
 	import { Context, ServiceSchema, CallingOptions, ServiceMethods } from "moleculer";
 	import { ApiSettingsSchema } from "moleculer-web";
 	import * as http from "http";
 	import { SocketOptions } from "socket.io-client";
 
+	class ClientMoleculerIO<
+		ClientUser,
+		ListenEvents extends EventsMap,
+		EmitEvents extends EventsMap,
+		ServerSideEvents extends EventsMap
+	> extends Client<ListenEvents, EmitEvents, ServerSideEvents> {
+		user?: ClientUser;
+	}
+	export class SocketMoleculerIO<
+		ClientUser = unknown,
+		ServiceSchema = IOServiceSchema,
+		ListenEvents extends EventsMap = DefaultEventsMap,
+		EmitEvents extends EventsMap = ListenEvents,
+		ServerSideEvents extends EventsMap = DefaultEventsMap
+	> extends Socket<ListenEvents, EmitEvents, ServerSideEvents> {
+		readonly $service: ServiceSchema;
+		readonly client: ClientMoleculerIO<ClientUser, ListenEvents, EmitEvents, ServerSideEvents>;
+	}
 	interface NamespaceEvent {
 		/**
 		 * The `event` has a `mappingPolicy` property to handle events without aliases.
@@ -30,7 +51,7 @@ declare module "moleculer-io" {
 		 */
 		onBeforeCall<P = any>(
 			ctx: Context<Record<string, any>, Record<any, any>>,
-			socket: Socket,
+			socket: SocketMoleculerIO,
 			action: string,
 			params: P,
 			callOptions: CallingOptions
@@ -41,7 +62,7 @@ declare module "moleculer-io" {
 		 */
 		onAfterCall<ORIGINAL_RES = any, MODIFIED_RES = any>(
 			ctx: Context<Record<string, any>>,
-			socket: Socket,
+			socket: SocketMoleculerIO,
 			res: ORIGINAL_RES
 		): Promise<void | MODIFIED_RES>;
 	}
@@ -65,7 +86,10 @@ declare module "moleculer-io" {
 	 * }
 	 * @see https://socket.io/docs/v4/server-api/#socketoneventname-callback
 	 */
-	type EventCustomFunction<T = unknown> = (...args: T[]) => void | Promise<void>;
+	type EventCustomFunction<T = unknown> = (
+		this: SocketMoleculerIO,
+		...args: T[]
+	) => void | Promise<void>;
 
 	interface IONamespace {
 		authorization?: boolean;
@@ -96,16 +120,19 @@ declare module "moleculer-io" {
 			$rooms: string[];
 		}
 	>(
-		socket: Socket
+		socket: SocketMoleculerIO
 	) => Promise<META>;
-	type SocketSaveMetaFunction = (socket: Socket, ctx: Context<any, any>) => Promise<void>;
+	type SocketSaveMetaFunction = (
+		socket: SocketMoleculerIO,
+		ctx: Context<any, any>
+	) => Promise<void>;
 	type SocketSaveUserFunction = (socket: Socket, user: any) => Promise<void>;
 	type SocketOnErrorFunction = (
 		err: Error,
 		respond: (error: Error | null, ...data: any[]) => void
 	) => void;
-	type SocketJoinRoomsFunction = (socket: Socket, rooms: string | string[]) => void;
-	type SocketLeaveRoomFunction = (socket: Socket, room: string) => void;
+	type SocketJoinRoomsFunction = (socket: SocketMoleculerIO, rooms: string | string[]) => void;
+	type SocketLeaveRoomFunction = (socket: SocketMoleculerIO, room: string) => void;
 
 	interface IOMethods extends ServiceMethods {
 		initSocketIO: InitSocketIOFunction;
