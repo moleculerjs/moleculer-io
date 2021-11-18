@@ -3,7 +3,14 @@ declare module "moleculer-io" {
 	import { Client } from "socket.io/dist/client";
 
 	import { Server, ServerOptions, Socket } from "socket.io";
-	import { Context, ServiceSchema, CallingOptions, ServiceMethods } from "moleculer";
+	import {
+		Context,
+		ServiceSchema,
+		CallingOptions,
+		ServiceMethods,
+		ServiceSettingSchema,
+		Service
+	} from "moleculer";
 	import { ApiSettingsSchema } from "moleculer-web";
 	import * as http from "http";
 	import { SocketOptions } from "socket.io-client";
@@ -18,12 +25,12 @@ declare module "moleculer-io" {
 	}
 	export class SocketMoleculerIO<
 		ClientUser = unknown,
-		ServiceSchema = IOServiceSchema,
+		ServiceSettings = ServiceSettingSchema,
 		ListenEvents extends EventsMap = DefaultEventsMap,
 		EmitEvents extends EventsMap = ListenEvents,
 		ServerSideEvents extends EventsMap = DefaultEventsMap
 	> extends Socket<ListenEvents, EmitEvents, ServerSideEvents> {
-		readonly $service: ServiceSchema;
+		readonly $service: Service<ServiceSettings>;
 		readonly client: ClientMoleculerIO<ClientUser, ListenEvents, EmitEvents, ServerSideEvents>;
 	}
 	interface NamespaceEvent {
