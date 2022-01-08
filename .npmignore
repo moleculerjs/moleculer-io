@@ -2,3 +2,5 @@ src/
 examples/
 test/
 .github/
+.vscode/
+.idea/
