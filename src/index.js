@@ -110,10 +110,16 @@ module.exports = {
 
 	actions: {
 		/**
-		 *
+		 * Invoke a Moleculer action, request received via socket.io
 		 */
 		call: {
 			visibility: "private",
+			tracing: {
+				tags: {
+					params: ["action", "params"]
+				}
+				//spanName: ctx => `${ctx.params.req.method} ${ctx.params.req.url}`
+			},
 			async handler(ctx) {
 				let { socket, action, params, handlerItem } = ctx.params;
 				if (!_.isString(action)) {
@@ -181,7 +187,7 @@ module.exports = {
 		},
 
 		/**
-		 *
+		 * Broadcast an event to all connected socket.io clients
 		 */
 		broadcast: {
 			params: {
@@ -214,7 +220,7 @@ module.exports = {
 		},
 
 		/**
-		 *
+		 * Get list of all connected clients.
 		 */
 		getClients: {
 			params: {
@@ -238,6 +244,7 @@ module.exports = {
 	},
 	methods: {
 		/**
+		 * Initialize Socket.io server
 		 *
 		 * @param {*} srv
 		 * @param {*} opts
@@ -333,15 +340,13 @@ module.exports = {
  * @returns
  */
 function checkWhitelist(action, whitelist) {
-	return (
-		whitelist.find(mask => {
-			if (_.isString(mask)) {
-				return match(action, mask);
-			} else if (_.isRegExp(mask)) {
-				return mask.test(action);
-			}
-		}) != null
-	);
+	return whitelist.some(mask => {
+		if (_.isString(mask)) {
+			return match(action, mask);
+		} else if (_.isRegExp(mask)) {
+			return mask.test(action);
+		}
+	});
 }
 
 /**
