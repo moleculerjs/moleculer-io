@@ -78,9 +78,11 @@ module.exports = {
 			if (item.authorization) {
 				this.logger.debug(`Add authorization to handler:`, item);
 				if (!_.isFunction(this.socketAuthorize)) {
+					/* istanbul ignore next */
 					this.logger.warn(
 						"Define 'socketAuthorize' method in the service to enable authorization."
 					);
+					/* istanbul ignore next */
 					item.authorization = false;
 				} else {
 					// add authorize middleware
@@ -142,9 +144,11 @@ module.exports = {
 					if (alias) {
 						action = alias;
 					} else if (handlerItem.mappingPolicy === "restrict") {
+						/* istanbul ignore next */
 						throw new ServiceNotFoundError({ action });
 					}
 				} else if (handlerItem.mappingPolicy === "restrict") {
+					/* istanbul ignore next */
 					throw new ServiceNotFoundError({ action });
 				}
 				//Check whitelist
@@ -168,6 +172,7 @@ module.exports = {
 					endpoint.action.visibility !== "published"
 				) {
 					// Action can't be published
+					/* istanbul ignore next */
 					throw new ServiceNotFoundError({ action });
 				}
 
