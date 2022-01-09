@@ -133,7 +133,7 @@ module.exports = {
 			async handler(ctx) {
 				let { socket, action, params, handlerItem } = ctx.params;
 				if (!_.isString(action)) {
-					this.logger.debug(`BadRequest:action is not string! action:`, action);
+					this.logger.debug(`BadRequest: action is not string! action:`, action);
 					throw new BadRequestError();
 				}
 				// Handle aliases

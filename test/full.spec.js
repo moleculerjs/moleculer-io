@@ -4,13 +4,6 @@ const { ServiceBroker, Context } = require("moleculer");
 const { MoleculerClientError } = require("moleculer").Errors;
 const SocketIOService = require("../src");
 const { UnAuthorizedError } = require("../src/errors");
-const { Duplex } = require("stream");
-
-/**
- * TODO:
- *  - test broadcast to client
- *  - test file upload
- */
 
 describe("Test full features", () => {
 	let broker, svc, port;
@@ -51,22 +44,18 @@ describe("Test full features", () => {
 							],
 							events: {
 								call: {
-									whitelist: ["math.*", "rooms.*", "io.*"],
+									aliases: {
+										div: "math.div"
+									},
+									whitelist: ["math.*", "rooms.*", "io.*", "send.*"],
 									onBeforeCall: beforeCall,
 									onAfterCall: afterCall
 									// callOptions:{}
+								},
+								custom: async function (p, respond) {
+									FLOW.push(`custom-${p.a}`);
+									respond(null, "custom-ok");
 								}
-								/*upload: async function ({ name, type }, file, respond) {
-								let stream = new Duplex();
-								stream.push(file);
-								stream.push(null);
-								await this.$service.broker.call("file.save", stream, {
-									meta: {
-										filename: name
-									}
-								});
-								respond(null, name);
-							}*/
 							}
 						},
 
@@ -123,18 +112,18 @@ describe("Test full features", () => {
 			actions: {
 				join: {
 					params: {
-						join: { type: "string", min: 2 }
+						room: { type: "string", min: 2 }
 					},
 					handler(ctx) {
-						ctx.meta.$join = ctx.params.join;
+						ctx.meta.$join = ctx.params.room;
 					}
 				},
 				leave: {
 					params: {
-						leave: { type: "string", min: 2 }
+						room: { type: "string", min: 2 }
 					},
 					handler(ctx) {
-						ctx.meta.$leave = ctx.params.leave;
+						ctx.meta.$leave = ctx.params.room;
 					}
 				},
 				get(ctx) {
@@ -170,6 +159,39 @@ describe("Test full features", () => {
 						);
 					}
 					return ctx.params.a / ctx.params.b;
+				}
+			}
+		});
+
+		broker.createService({
+			name: "send",
+			actions: {
+				message: {
+					params: {
+						namespace: { type: "string", default: "/" },
+						room: { type: "string" },
+						text: { type: "string" }
+					},
+					async handler(ctx) {
+						await this.broker.call("io.broadcast", {
+							event: "msg",
+							namespace: ctx.params.namespace,
+							args: [ctx.params.text],
+							rooms: [ctx.params.room]
+						});
+						await this.Promise.delay(50);
+					}
+				},
+				leave: {
+					params: {
+						leave: { type: "string", min: 2 }
+					},
+					handler(ctx) {
+						ctx.meta.$leave = ctx.params.leave;
+					}
+				},
+				get(ctx) {
+					return ctx.meta.$rooms;
 				}
 			}
 		});
@@ -270,7 +292,7 @@ describe("Test full features", () => {
 		it("should receive error", async () => {
 			expect.assertions(6);
 			try {
-				await call(client, "math.div", { a: 10, b: 0 });
+				await call(client, "div", { a: 10, b: 0 });
 			} catch (err) {
 				expect(err.name).toBe("MoleculerClientError");
 				expect(err.code).toBe(400);
@@ -312,6 +334,19 @@ describe("Test full features", () => {
 				expect(err.message).toBe("Service 'top-secret.hello' is not found.");
 				expect(FLOW).toEqual(["packet middleware"]);
 			}
+		});
+
+		it("call custom handler", async () => {
+			const res = await new Promise(function (resolve, reject) {
+				client.emit("custom", { a: 5 }, function (err, res) {
+					if (err) return reject(err);
+					resolve(res);
+				});
+			});
+			expect(res).toBe("custom-ok");
+			expect(FLOW).toEqual(["packet middleware", "custom-5"]);
+			expect(beforeCall).toBeCalledTimes(0);
+			expect(afterCall).toBeCalledTimes(0);
 		});
 	});
 
@@ -398,21 +433,57 @@ describe("Test full features", () => {
 			expect(await call(client, "rooms.get")).toEqual([client.id]);
 			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([]);
 
-			await call(client, "rooms.join", { join: "room-01" });
+			await call(client, "rooms.join", { room: "room-01" });
 			expect(await call(client, "rooms.get")).toEqual([client.id, "room-01"]);
 			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([client.id]);
 
-			await call(client, "rooms.join", { join: "room-02" });
+			await call(client, "rooms.join", { room: "room-02" });
 			expect(await call(client, "rooms.get")).toEqual([client.id, "room-01", "room-02"]);
 			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([client.id]);
 
-			await call(client, "rooms.leave", { leave: "room-01" });
+			await call(client, "rooms.leave", { room: "room-01" });
 			expect(await call(client, "rooms.get")).toEqual([client.id, "room-02"]);
 			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([]);
 
-			await call(client, "rooms.leave", { leave: "room-02" });
+			await call(client, "rooms.leave", { room: "room-02" });
 			expect(await call(client, "rooms.get")).toEqual([client.id]);
 			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([]);
+		});
+	});
+
+	describe("Test rooms and backward messages", () => {
+		let client;
+		let PACKETS = [];
+
+		beforeAll(() => {
+			client = io.connect(`ws://localhost:${port}`, { forceNew: true });
+			client.on("msg", packet => PACKETS.push(packet));
+		});
+		afterAll(() => client.disconnect());
+		beforeEach(() => (PACKETS = []));
+
+		it("receive messages for socketId", async () => {
+			expect(await call(client, "rooms.get")).toEqual([client.id]);
+			expect(PACKETS).toEqual([]);
+			await call(client, "send.message", { text: "Hello to socketId", room: client.id });
+			await call(client, "send.message", { text: "Hello to room-1", room: "room-1" });
+			expect(PACKETS).toEqual(["Hello to socketId"]);
+		});
+
+		it("receive messages for socketId & room", async () => {
+			await call(client, "rooms.join", { room: "room-1" });
+			expect(PACKETS).toEqual([]);
+			await call(client, "send.message", { text: "Hello to socketId", room: client.id });
+			await call(client, "send.message", { text: "Hello to room-1", room: "room-1" });
+			expect(PACKETS).toEqual(["Hello to socketId", "Hello to room-1"]);
+		});
+
+		it("receive messages for socketId", async () => {
+			await call(client, "rooms.leave", { room: "room-1" });
+			expect(PACKETS).toEqual([]);
+			await call(client, "send.message", { text: "Hello to socketId", room: client.id });
+			await call(client, "send.message", { text: "Hello to room-1", room: "room-1" });
+			expect(PACKETS).toEqual(["Hello to socketId"]);
 		});
 	});
 });

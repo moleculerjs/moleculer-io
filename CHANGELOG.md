@@ -1,3 +1,12 @@
+<a name="v2.0.0"></a>
+
+# [2.0.0](https://github.com/moleculerjs/moleculer-io/compare/2443ce39edf16c0ead578b7e567df94eaf9f0ab9...v2.0.0) (2022-01-09)
+
+- **[breaking change]** upgrade to Socket.io v4.
+- refactored codebase.
+- added integration tests.
+- fixed namespace middleware handling issue.
+
 
 # Changelog of 0.x.x and 1.x.x
 

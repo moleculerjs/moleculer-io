@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "nodemon examples/index.js",
+    "dev:client": "iola io ws://localhost:3000",
     "ci": "jest --watch",
     "deps": "npm-check -u",
     "test": "jest --coverage --forceExit --detectOpenHandles"
