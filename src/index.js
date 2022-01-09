@@ -234,21 +234,16 @@ module.exports = {
 		 */
 		getClients: {
 			params: {
-				namespace: { type: "string", optional: true },
+				namespace: { type: "string", default: "/" },
 				room: "string"
 			},
-			handler(ctx) {
-				return new Promise((resolve, reject) => {
-					this.io
-						.of(ctx.params.namespaces || "/")
-						.to(ctx.params.room)
-						.clients((err, clients) => {
-							if (err) {
-								return reject(err);
-							}
-							resolve(clients);
-						});
-				});
+			async handler(ctx) {
+				const sids = await this.io
+					.of(ctx.params.namespace)
+					.in(ctx.params.room)
+					.allSockets();
+
+				return Array.from(sids);
 			}
 		}
 	},
@@ -281,6 +276,7 @@ module.exports = {
 		 */
 		socketGetMeta(socket) {
 			const meta = {
+				$socketId: socket.id,
 				user: socket.client.user,
 				$rooms: Array.from(socket.rooms.keys())
 			};

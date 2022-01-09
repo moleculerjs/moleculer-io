@@ -9,7 +9,6 @@ const { Duplex } = require("stream");
 /**
  * TODO:
  *  - test broadcast to client
- *  - test getClients
  *  - test file upload
  */
 
@@ -52,7 +51,7 @@ describe("Test full features", () => {
 							],
 							events: {
 								call: {
-									whitelist: ["math.*", "rooms.*"],
+									whitelist: ["math.*", "rooms.*", "io.*"],
 									onBeforeCall: beforeCall,
 									onAfterCall: afterCall
 									// callOptions:{}
@@ -218,6 +217,7 @@ describe("Test full features", () => {
 		let client;
 
 		beforeAll(() => (client = io.connect(`ws://localhost:${port}`, { forceNew: true })));
+		afterAll(() => client.disconnect());
 
 		it("call published actions", async () => {
 			const res = await call(client, "math.add", { a: 1, b: 2 });
@@ -237,6 +237,7 @@ describe("Test full features", () => {
 				{ a: 1, b: 2 },
 				{
 					meta: {
+						$socketId: client.id,
 						$rooms: [client.id],
 						user: undefined
 					}
@@ -315,11 +316,16 @@ describe("Test full features", () => {
 	});
 
 	describe("Test '/admin' namespace actions", () => {
-		it("call actions with authenticated user", async () => {
-			const adminClient = io.connect(`ws://localhost:${port}/admin`, {
+		let adminClient;
+		beforeAll(() => {
+			adminClient = io.connect(`ws://localhost:${port}/admin`, {
 				forceNew: true,
 				query: { token: "12345" }
 			});
+		});
+		afterAll(() => adminClient.disconnect());
+
+		it("call actions with authenticated user", async () => {
 			const res = await call(adminClient, "top-secret.hello", { name: "Moleculer" });
 			expect(res).toBe("Moleculer hello");
 			expect(FLOW).toEqual([
@@ -338,6 +344,7 @@ describe("Test full features", () => {
 				{ name: "Moleculer" },
 				{
 					meta: {
+						$socketId: adminClient.id,
 						$rooms: [adminClient.id],
 						user: {
 							id: 1,
@@ -376,6 +383,8 @@ describe("Test full features", () => {
 				expect(err.message).toBe("Unauthorized");
 				expect(FLOW).toEqual(["auth"]);
 			}
+
+			unauthenticatedClient.disconnect();
 		});
 	});
 
@@ -383,21 +392,27 @@ describe("Test full features", () => {
 		let client;
 
 		beforeAll(() => (client = io.connect(`ws://localhost:${port}`, { forceNew: true })));
+		afterAll(() => client.disconnect());
 
 		it("run plan join/leave rooms", async () => {
 			expect(await call(client, "rooms.get")).toEqual([client.id]);
+			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([]);
 
 			await call(client, "rooms.join", { join: "room-01" });
 			expect(await call(client, "rooms.get")).toEqual([client.id, "room-01"]);
+			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([client.id]);
 
 			await call(client, "rooms.join", { join: "room-02" });
 			expect(await call(client, "rooms.get")).toEqual([client.id, "room-01", "room-02"]);
+			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([client.id]);
 
 			await call(client, "rooms.leave", { leave: "room-01" });
 			expect(await call(client, "rooms.get")).toEqual([client.id, "room-02"]);
+			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([]);
 
 			await call(client, "rooms.leave", { leave: "room-02" });
 			expect(await call(client, "rooms.get")).toEqual([client.id]);
+			expect(await call(client, "io.getClients", { room: "room-01" })).toEqual([]);
 		});
 	});
 });
