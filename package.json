@@ -7,7 +7,7 @@
     "example": "examples"
   },
   "scripts": {
-    "dev": "node examples/simple/index.js",
+    "dev": "nodemon examples/index.js",
     "ci": "jest --watch",
     "deps": "npm-check -u",
     "test": "jest --coverage --forceExit --detectOpenHandles"
@@ -40,8 +40,10 @@
     "express": "^4.17.2",
     "jest": "^27.4.7",
     "jest-cli": "^27.4.7",
-    "moleculer": "^0.14.18",
-    "moleculer-web": "^0.10.3",
+    "moleculer": "^0.14.19",
+    "moleculer-repl": "^0.7.0",
+    "moleculer-web": "^0.10.4",
+    "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
     "socket.io-client": "^4.4.1",
     "socket.io-redis": "^6.1.1",
@@ -62,7 +64,7 @@
     "coverageDirectory": "../coverage",
     "coveragePathIgnorePatterns": [
       "/node_modules/",
-      "/test/services/"
+      "/test/"
     ]
   }
 }

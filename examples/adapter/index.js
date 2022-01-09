@@ -19,4 +19,4 @@ broker.createService({
 	}
 });
 
-broker.start();
+broker.start().then(() => broker.repl());

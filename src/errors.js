@@ -1,6 +1,6 @@
 /*
- * moleculer-sc
- * Copyright (c) 2018 tiaod (https://github.com/tiaod/moleculer-sc)
+ * moleculer-io
+ * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/moleculer-io)
  * MIT Licensed
  */
 

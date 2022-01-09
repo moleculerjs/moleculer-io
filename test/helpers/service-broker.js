@@ -83,7 +83,6 @@ const ioService = broker.createService({
 		}
 	}
 });
-ioService.initSocketIO(3000);
 
 broker.createService({
 	name: "math",

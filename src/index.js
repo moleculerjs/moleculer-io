@@ -1,3 +1,11 @@
+/*
+ * moleculer-io
+ * Copyright (c) 2022 MoleculerJS (https://github.com/moleculerjs/moleculer-io)
+ * MIT Licensed
+ */
+
+"use strict";
+
 const { Server: IO } = require("socket.io");
 const _ = require("lodash");
 const { match } = require("moleculer").Utils;
@@ -42,8 +50,9 @@ module.exports = {
 		const namespaces = this.settings.io.namespaces;
 		for (const nsp in namespaces) {
 			const item = namespaces[nsp];
-			this.logger.debug("Add route:", item);
+			this.logger.debug(`Add '${nsp}' route:`, item);
 			if (!handlers[nsp]) handlers[nsp] = {};
+
 			const events = item.events;
 			for (const event in events) {
 				const handler = events[event];
@@ -63,7 +72,7 @@ module.exports = {
 			this.initSocketIO();
 		}
 		const namespaces = this.settings.io.namespaces;
-		for (const nsp in namespaces) {
+		Object.keys(namespaces).forEach(nsp => {
 			const item = namespaces[nsp];
 			const namespace = this.io.of(nsp);
 			if (item.authorization) {
@@ -89,7 +98,7 @@ module.exports = {
 				socket.$service = this;
 				this.logger.info(`(nsp:'${nsp}') Client connected:`, socket.id);
 				if (item.packetMiddlewares) {
-					//socketmiddlewares
+					//socket middlewares
 					for (const middleware of item.packetMiddlewares) {
 						socket.use(middleware.bind(this));
 					}
@@ -98,13 +107,14 @@ module.exports = {
 					socket.on(eventName, handlers[eventName]);
 				}
 			});
-		}
-		this.logger.info("Socket.IO API Gateway started.");
+		});
+
+		this.logger.info("Socket.IO Websocket Gateway started.");
 	},
 
 	stopped() {
 		if (this.io) {
-			this.io.close();
+			return this.io.close();
 		}
 	},
 

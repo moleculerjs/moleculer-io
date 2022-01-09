@@ -176,6 +176,6 @@ const ioService = broker.createService({
 
 ioService.initSocketIO(server);
 
-broker.start();
+broker.start().then(() => broker.repl());
 
 server.listen(3000);

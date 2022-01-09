@@ -7,16 +7,15 @@
 [![Downloads](https://img.shields.io/npm/dm/moleculer-io.svg)](https://www.npmjs.com/package/moleculer-io)
 <h1>Moleculer-io</h1>
 
-The `moleculer-io` is the API gateway service for [Moleculer](https://github.com/moleculerjs/moleculer) using `socket.io`. Use it to publish your services.
+The `moleculer-io` is a Websocket gateway service for [Moleculer](https://github.com/moleculerjs/moleculer) using `socket.io`.
 
 <h1>Features</h1>
-
--   Call moleculer actions by emiting Socket.io events.
--   Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.user`)
--   Whitelist.
--   Middlewares.
--   Broadcast events.
--   Joining and leaving rooms.
+- Call moleculer actions by emiting Socket.io events.
+- Support Socket.io authorization (Default: `socket.client.user` => moleculer `ctx.meta.user`)
+- Whitelist.
+- Middlewares.
+- Broadcast events.
+- Joining and leaving rooms.
 
 <h1>Install</h1>
 
@@ -43,8 +42,8 @@ $ npm install moleculer-io
   - [CORS](#cors)
   - [Using multiple instances](#using-multiple-instances)
   - [Full settings](#full-settings)
-- [Change logs](#change-logs)
-- [License](#license)
+  - [License](#license)
+  - [Contact](#contact)
 
 <!-- /TOC -->
 
@@ -139,7 +138,7 @@ Examples:
 -   Call `test.hello` action without params: `socket.emit('call','test.hello', callback)`
 -   Call `math.add` action with params: `socket.emit('call','math.add', {a:25, b:13}, callback)`
 -   Get health info of node: `socket.emit('call','$node.health', callback)`
--   List all actions: `socket.emit('call', '$node.list', callback)`
+-   List all actions: `socket.emit('call', '$node.actions', callback)`
 
 **Example client:**
 
@@ -221,8 +220,7 @@ broker.createService({
 })
 ```
 
-Then doing `socket.emit('call','math.add', {a:25, b:13}, callback)` on the client side
-will be equivalent to `socket.emit('call','add', {a:25, b:13}, callback)`.
+Then doing `socket.emit('call','math.add', {a:25, b:13}, callback)` on the client side will be equivalent to `socket.emit('call','add', {a:25, b:13}, callback)`.
 
 ### Mapping policy
 
@@ -503,7 +501,7 @@ broker.createService({
 ```
 ## Joining and leaving rooms
 
-In your action, set ctx.meta.$join or ctx.meta.$leave to the rooms you want to join or leave.
+In your action, set `ctx.meta.$join` or `ctx.meta.$leave` to the rooms you want to join or leave.
 
 eg.
 
@@ -517,7 +515,7 @@ ctx.meta.$leave = ['room1', 'room2'] // Leave room1 and room2
 
 After the action finished, `moleculer-io` will join or leave the room you specified.
 
-Example room management service:
+**Example room management service:**
 
 ```javascript
 broker.createService({
@@ -551,7 +549,7 @@ broker.call('io.broadcast', {
 })
 ```
 
-Note: You should change the 'io' to the service name you created.
+_Note: You should change the 'io' to the service name you created._
 
 ## CORS
 `moleculer-io` will pick the `settings.cors.origin` option and use it to validate the request. (Which is also compatible with `moleculer-web`! )
@@ -636,73 +634,12 @@ settings: {
   }
 }
 ```
+## License
 
-# Change logs
-**1.1.3**: Merge [#27](https://github.com/moleculerjs/moleculer-io/pull/27)
+The project is available under the [MIT license](https://tldrlegal.com/license/mit-license).
 
-**1.1.1**: Fix [#18](https://github.com/moleculerjs/moleculer-io/issues/18)
+## Contact
 
-**1.1.0**: Add cors config
+Copyright (c) 2021 MoleculerJS
 
-**1.0.9**: Fix [#17](https://github.com/moleculerjs/moleculer-io/issues/17)
-
-**1.0.8**: Fix [#12](https://github.com/moleculerjs/moleculer-io/issues/12)
-
-**1.0.7**: Add `settings.server` options.
-
-**1.0.6**: Set the babel targets.node to 'current'
-
-**1.0.5**: Bug fix.
-
-**1.0.4**: Bug fix.
-
-**1.0.3**: Add `aliases` and `mappingPolicy` event properties.
-
-**1.0.2**: `socketAuthorize` method can return the user now. Add `socketSaveUser` method.
-
-**1.0.1**: Bug fix.
-
-**1.0.0**: See [Migrate to 1.x](migration_to_v1.md).
-
-**0.13.4**: Fix bug of multiple custom event handler.
-
-**0.13.3**: Add internal pointer to service instance, make `socket.$service` pointed to service instance.
-
-**0.13.2**: Added socket.io adapter options for intercommunication of multiple instances
-
-**0.13.1**: Add request logger.
-
-**0.13.0**: `moleculer-io` can now get alone well with `moleculer-web`, you can use them together!
-	\- Note that `settings.options` now become to `settings.io`.
-
-**0.12.1**: CustomHandler context now bind to the service instance.
-
-**0.12.0**: Change `ctx.meta.$user` to `ctx.meta.user`, add `saveUser` method.
-
-**0.11.0**: Bind middlewares context to service instance.
-
-**0.10.0**: Add action visibility support. See [Action visibility](https://moleculer.services/docs/0.13/actions.html#Action-visibility)
-
-**0.9.1**: Fix `ServiceNotFoundError` message.
-
-**0.9.0**: Upgrade to `moleculer@0.13`, no breaking changes.
-
-**0.8.1**: Fix io.broadcast error.
-
-**0.8.0**: Add ctx.meta.$rooms, and ctx.meta.$join ctx.meta.$leave
-
-**0.7.0**: Add hooks.
-
-**0.6.0**: Modify settings format. again :)
-
-**0.5.0**: Add broadcast to socket.io rooms
-
-**0.4.0**: Modify settings format.
-
-**0.3.0**: Add login handler.
-
-**0.2.0**: Add `initServer` method.
-
-# License
-
-Moleculer-io is available under the MIT license.
+[![@MoleculerJS](https://img.shields.io/badge/github-moleculerjs-green.svg)](https://github.com/moleculerjs) [![@MoleculerJS](https://img.shields.io/badge/twitter-MoleculerJS-blue.svg)](https://twitter.com/MoleculerJS)
