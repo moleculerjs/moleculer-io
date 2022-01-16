@@ -257,7 +257,7 @@ broker.createService({
 
 ## Custom handler
 
-You can make use of custom functions within the declaration of event handler.
+You can make use of custom functions within the declaration of an event handler.
 
 ```javascript
 broker.createService({
@@ -351,7 +351,7 @@ broker.createService({
 })
 ```
 
-Note: If you provie a meta field here, it replace the socketGetMeta method's result.
+Note: If you provide a meta field here, it replaces the socketGetMeta method's result.
 
 ## Middlewares
 
@@ -513,7 +513,7 @@ ctx.meta.$leave = 'room1' //Leave room1
 ctx.meta.$leave = ['room1', 'room2'] // Leave room1 and room2
 ```
 
-After the action finished, `moleculer-io` will join or leave the room you specified.
+After the action is finished, `moleculer-io` will join or leave the room you specified.
 
 **Example room management service:**
 
@@ -576,8 +576,8 @@ For detail see https://socket.io/docs/server-api/#server-origins-fn
 
 If you plan for a highly available setup (launching multiple instances of this service behind a Load Balancer),
 you will have to take some extra steps. Due to the nature of WebSockets these instances will need a PubSub capable broker
-to connect to, in order to broadcast messages to sockets which are connected to other instances. For a more
-in depth explanation of this concept, and additional steps that have to be taken (such as Load Balancer configuration), refere to the [Socket.io Documentation](https://socket.io/docs/using-multiple-nodes/).
+to connect to, in order to broadcast messages to sockets that are connected to other instances. For a more
+in depth explanation of this concept, and additional steps that have to be taken (such as Load Balancer configuration), refer to the [Socket.io Documentation](https://socket.io/docs/using-multiple-nodes/).
 
 In order to interconnect this service with other services, start the service with an adapter:
 
