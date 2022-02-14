@@ -40,7 +40,10 @@ describe("Test with default settings", () => {
 		client = io.connect("http://localhost:" + svc.io.httpServer.address().port);
 	});
 
-	afterAll(() => broker.stop());
+	afterAll(() => {
+		client.disconnect();
+		return broker.stop();
+	});
 
 	it("should call an action", async () => {
 		const res = await callAwait(client, "greeter.hello");

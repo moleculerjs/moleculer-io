@@ -11,7 +11,7 @@
     "dev:client": "iola io ws://localhost:3000",
     "ci": "jest --watch",
     "deps": "npm-check -u",
-    "test": "jest --coverage --forceExit --detectOpenHandles"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
