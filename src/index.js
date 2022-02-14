@@ -13,6 +13,7 @@ const { ServiceNotFoundError } = require("moleculer").Errors;
 const { BadRequestError } = require("./errors");
 const kleur = require("kleur");
 
+/** @type {import('moleculer').ServiceSchema SocketIOMixin}*/
 module.exports = {
 	name: "io",
 
@@ -20,6 +21,7 @@ module.exports = {
 		// port: 3000,
 		server: true,
 		io: {
+			/** @type {import('socket.io').ServerOptions} */
 			// options: {}, //socket.io options
 			namespaces: {
 				"/": {
@@ -27,6 +29,7 @@ module.exports = {
 					// middlewares: [],
 					// packetMiddlewares:[],
 					events: {
+						/** @type {NamespaceEvent} */
 						call: {
 							// whitelist: [],
 							// aliases: {},
@@ -47,6 +50,7 @@ module.exports = {
 
 	created() {
 		const handlers = {};
+		/** @type {Record<String, HandlerItem>} */
 		const namespaces = this.settings.io.namespaces;
 		for (const nsp in namespaces) {
 			const item = namespaces[nsp];
@@ -71,9 +75,11 @@ module.exports = {
 		if (!this.io) {
 			this.initSocketIO();
 		}
+		/** @type {Record<String, HandlerItem>} */
 		const namespaces = this.settings.io.namespaces;
 		Object.keys(namespaces).forEach(nsp => {
 			const item = namespaces[nsp];
+			/** @type {import('socket.io').Namespace} */
 			const namespace = this.io.of(nsp);
 			if (item.authorization) {
 				this.logger.debug(`Add authorization to handler:`, item);
@@ -132,6 +138,11 @@ module.exports = {
 				}
 				//spanName: ctx => `${ctx.params.req.method} ${ctx.params.req.url}`
 			},
+			/**
+			 *
+			 * @param {import('moleculer').Context<CallActionParams, CallActionMeta>} ctx
+			 * @returns
+			 */
 			async handler(ctx) {
 				let { socket, action, params, handlerItem } = ctx.params;
 				if (!_.isString(action)) {
@@ -256,8 +267,8 @@ module.exports = {
 		/**
 		 * Initialize Socket.io server
 		 *
-		 * @param {*} srv
-		 * @param {*} opts
+		 * @param {import('socket.io').Server?} srv
+		 * @param {Partial<import('socket.io').ServerOptions>} opts
 		 */
 		initSocketIO(srv, opts) {
 			if ("object" == typeof srv && srv instanceof Object && !srv.listen) {
@@ -276,10 +287,11 @@ module.exports = {
 
 		/**
 		 *
-		 * @param {*} socket
+		 * @param {import('socket.io').Socket} socket
 		 * @returns
 		 */
 		socketGetMeta(socket) {
+			/** @type {SocketMeta} */
 			const meta = {
 				$socketId: socket.id,
 				user: socket.client.user,
@@ -291,8 +303,8 @@ module.exports = {
 
 		/**
 		 *
-		 * @param {*} socket
-		 * @param {*} ctx
+		 * @param {import('socket.io').Socket} socket
+		 * @param {import('moleculer').Context} ctx
 		 */
 		socketSaveMeta(socket, ctx) {
 			this.socketSaveUser(socket, ctx.meta.user);
@@ -300,8 +312,8 @@ module.exports = {
 
 		/**
 		 *
-		 * @param {*} socket
-		 * @param {*} user
+		 * @param {import('socket.io').Socket} socket
+		 * @param {} user
 		 */
 		socketSaveUser(socket, user) {
 			socket.client.user = user;
@@ -309,8 +321,8 @@ module.exports = {
 
 		/**
 		 *
-		 * @param {*} err
-		 * @param {*} respond
+		 * @param {Error} err
+		 * @param {Function} respond
 		 * @returns
 		 */
 		socketOnError(err, respond) {
@@ -322,8 +334,8 @@ module.exports = {
 
 		/**
 		 *
-		 * @param {*} socket
-		 * @param {*} rooms
+		 * @param {import('socket.io').Socket} socket
+		 * @param {String|String[]} rooms
 		 * @returns
 		 */
 		socketJoinRooms(socket, rooms) {
@@ -333,8 +345,8 @@ module.exports = {
 
 		/**
 		 *
-		 * @param {*} socket
-		 * @param {*} room
+		 * @param {import('socket.io').Socket} socket
+		 * @param {String} room
 		 * @returns
 		 */
 		socketLeaveRoom(socket, room) {
@@ -346,8 +358,8 @@ module.exports = {
 
 /**
  *
- * @param {*} action
- * @param {*} whitelist
+ * @param {String} action Action Name
+ * @param {Array<String>|Array<RegExp>} whitelist White list name
  * @returns
  */
 function checkWhitelist(action, whitelist) {
@@ -362,8 +374,8 @@ function checkWhitelist(action, whitelist) {
 
 /**
  *
- * @param {*} svc
- * @param {*} handlerItem
+ * @param {import('moleculer').Service} svc
+ * @param {NamespaceEvent} handlerItem
  * @returns
  */
 function makeAuthorizeMiddleware(svc, handlerItem) {
@@ -380,8 +392,8 @@ function makeAuthorizeMiddleware(svc, handlerItem) {
 
 /**
  *
- * @param {*} svc
- * @param {*} handlerItem
+ * @param {import('moleculer').Service} svc
+ * @param {NamespaceEvent} handlerItem
  * @returns
  */
 function makeHandler(svc, handlerItem) {
@@ -415,3 +427,52 @@ function makeHandler(svc, handlerItem) {
 		}
 	};
 }
+
+/**
+ * @typedef HandlerItem
+ * @property {Boolean?} authorization Flag indicating whether to use auth.
+ * @property {Array<Function>?} middlewares
+ * @property {Array<Function>?} packetMiddlewares Socket.IO middleware. More info: https://socket.io/docs/v3/middlewares/
+ * @property {Record<string,NamespaceEvent>} events
+ */
+
+/**
+ * @typedef NamespaceEvent
+ * @property {String?} mappingPolicy The `event` has a `mappingPolicy` property to handle events without aliases.
+ * 									- `all` - enable to handle all actions with or without aliases (default)
+ * 									- `restrict` - enable to handle only the actions with aliases
+ * @property {Record<string, string>?} aliases You can use alias names instead of action names. Example `{ add: "math.add" }`
+ * @property {Array<String>?} whitelist
+ * @property {Function?} onBeforeCall The event handler has before & after call hooks. You can use it to set ctx.meta, access socket object or modify the response data
+ * @property {Function?} onAfterCall The event handler has before & after call hooks. You can use it to set ctx.meta, access socket object or modify the response data
+ * @property {import('moleculer').CallingOptions} callOptions
+ */
+
+/**
+ * @typedef CallActionParams
+ * @property {import('socket.io').Socket} socket
+ * @property {String} action Action name
+ * @property {Object} params Prams to be passed to the Action
+ * @property {NamespaceEvent} handlerItem
+ */
+
+/**
+ * @typedef CallActionMeta
+ * @property {String} $join Room to join
+ * @property {String|Array<String>} $leave Room(s) to leave
+ * @property {User} user User info
+ */
+
+/**
+ * @typedef SocketMeta
+ * @property {String} $socketId
+ * @property {Array<String>} $rooms
+ * @property {User} user
+ */
+
+/**
+ * @typedef User
+ * @property {String|Number} id
+ * @property {String} name
+ * @property {String} description
+ */
