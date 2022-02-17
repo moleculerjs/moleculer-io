@@ -48,6 +48,7 @@ module.exports = {
 		}
 	},
 
+	/** @this {import('moleculer').Service} */
 	created() {
 		const handlers = {};
 		/** @type {Record<String, HandlerItem>} */
@@ -71,55 +72,23 @@ module.exports = {
 		this.settings.io.handlers = handlers;
 	},
 
+	/** @this {import('moleculer').Service} */
 	started() {
 		if (!this.io) {
 			this.initSocketIO();
 		}
-		/** @type {Record<String, HandlerItem>} */
+		/** @type {Record<String, HandlerItem>} Register default namespaces */
 		const namespaces = this.settings.io.namespaces;
 		Object.keys(namespaces).forEach(nsp => {
 			const item = namespaces[nsp];
-			/** @type {import('socket.io').Namespace} */
-			const namespace = this.io.of(nsp);
-			if (item.authorization) {
-				this.logger.debug(`Add authorization to handler:`, item);
-				if (!_.isFunction(this.socketAuthorize)) {
-					/* istanbul ignore next */
-					this.logger.warn(
-						"Define 'socketAuthorize' method in the service to enable authorization."
-					);
-					/* istanbul ignore next */
-					item.authorization = false;
-				} else {
-					// add authorize middleware
-					namespace.use(makeAuthorizeMiddleware(this, item));
-				}
-			}
-			if (item.middlewares) {
-				//Server middlewares
-				for (const middleware of item.middlewares) {
-					namespace.use(middleware.bind(this));
-				}
-			}
-			const handlers = this.settings.io.handlers[nsp];
-			namespace.on("connection", socket => {
-				socket.$service = this;
-				this.logger.info(`(nsp:'${nsp}') Client connected:`, socket.id);
-				if (item.packetMiddlewares) {
-					//socket middlewares
-					for (const middleware of item.packetMiddlewares) {
-						socket.use(middleware.bind(this));
-					}
-				}
-				for (const eventName in handlers) {
-					socket.on(eventName, handlers[eventName]);
-				}
-			});
+
+			this.registerNamespace(nsp, item);
 		});
 
 		this.logger.info("Socket.IO Websocket Gateway started.");
 	},
 
+	/** @this {import('moleculer').Service} */
 	stopped() {
 		if (this.io) {
 			return this.io.close();
@@ -127,6 +96,14 @@ module.exports = {
 	},
 
 	actions: {
+		addNamespace: {
+			params: {
+				namespace: "string"
+			},
+			async handler(ctx) {
+				return this.registerNamespace(ctx.params.namespace);
+			}
+		},
 		/**
 		 * Invoke a Moleculer action, request received via socket.io
 		 */
@@ -265,6 +242,51 @@ module.exports = {
 	},
 	methods: {
 		/**
+		 * Register a namespace
+		 * @param {String} nsp Namespace
+		 * @param {HandlerItem} item
+		 */
+		registerNamespace(nsp, item) {
+			/** @type {import('socket.io').Namespace} */
+			const namespace = this.io.of(nsp);
+			if (item && item.authorization) {
+				this.logger.debug(`Add authorization to handler:`, item);
+				if (!_.isFunction(this.socketAuthorize)) {
+					/* istanbul ignore next */
+					this.logger.warn(
+						"Define 'socketAuthorize' method in the service to enable authorization."
+					);
+					/* istanbul ignore next */
+					item.authorization = false;
+				} else {
+					// add authorize middleware
+					namespace.use(makeAuthorizeMiddleware(this, item));
+				}
+			}
+			if (item && item.middlewares) {
+				//Server middlewares
+				for (const middleware of item.middlewares) {
+					namespace.use(middleware.bind(this));
+				}
+			}
+			// Handlers generated in created()
+			const handlers = this.settings.io.handlers[nsp] || this.settings.io.handlers["/"];
+			namespace.on("connection", socket => {
+				socket.$service = this;
+				this.logger.info(`(nsp:'${nsp}') Client connected:`, socket.id);
+				if (item && item.packetMiddlewares) {
+					//socket middlewares
+					for (const middleware of item.packetMiddlewares) {
+						socket.use(middleware.bind(this));
+					}
+				}
+				for (const eventName in handlers) {
+					socket.on(eventName, handlers[eventName]);
+				}
+			});
+		},
+
+		/**
 		 * Initialize Socket.io server
 		 *
 		 * @param {import('socket.io').Server?} srv
@@ -391,6 +413,7 @@ function makeAuthorizeMiddleware(svc, handlerItem) {
 }
 
 /**
+ * Default handler
  *
  * @param {import('moleculer').Service} svc
  * @param {NamespaceEvent} handlerItem
