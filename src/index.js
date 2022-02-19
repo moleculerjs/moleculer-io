@@ -82,7 +82,7 @@ module.exports = {
 		Object.keys(namespaces).forEach(nsp => {
 			const item = namespaces[nsp];
 
-			this.registerNamespace(nsp, item);
+			this.registerNamespace(nsp, nsp, item);
 		});
 
 		this.logger.info("Socket.IO Websocket Gateway started.");
@@ -96,14 +96,6 @@ module.exports = {
 	},
 
 	actions: {
-		addNamespace: {
-			params: {
-				namespace: "string"
-			},
-			async handler(ctx) {
-				return this.registerNamespace(ctx.params.namespace);
-			}
-		},
 		/**
 		 * Invoke a Moleculer action, request received via socket.io
 		 */
@@ -241,12 +233,22 @@ module.exports = {
 		}
 	},
 	methods: {
+		listIOHandlers() {
+			return this.settings.io.handlers;
+		},
+
 		/**
 		 * Register a namespace
 		 * @param {String} nsp Namespace
+		 * @param {String} handlerName Name handler registered in created()
 		 * @param {HandlerItem} item
 		 */
-		registerNamespace(nsp, item) {
+		registerNamespace(nsp, handlerName, item) {
+			/*if (Array.from(this.io._nsps.keys()).includes(nsp)) {
+				this.logger.debug(`Namespace '${nsp}' already exists`);
+				throw new Error(`Namespace '${nsp}' already exists`);
+			}*/
+
 			/** @type {import('socket.io').Namespace} */
 			const namespace = this.io.of(nsp);
 			if (item && item.authorization) {
@@ -270,7 +272,7 @@ module.exports = {
 				}
 			}
 			// Handlers generated in created()
-			const handlers = this.settings.io.handlers[nsp] || this.settings.io.handlers["/"];
+			const handlers = this.settings.io.handlers[handlerName];
 			namespace.on("connection", socket => {
 				socket.$service = this;
 				this.logger.info(`(nsp:'${nsp}') Client connected:`, socket.id);
