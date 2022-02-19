@@ -83,6 +83,22 @@ describe("Test full features", () => {
 									}
 								}
 							}
+						},
+
+						dynamic: {
+							// Don't create IO namespace
+							// Will only create the handler(s)
+							createNamespace: false,
+							events: {
+								call: {
+									onBeforeCall: async function (ctx, socket, args) {
+										FLOW.push("Dynamic onBeforeCall");
+									},
+									onAfterCall: async function (ctx, socket, data) {
+										FLOW.push("Dynamic onAfterCall");
+									}
+								}
+							}
 						}
 					}
 				}
@@ -420,6 +436,57 @@ describe("Test full features", () => {
 			}
 
 			unauthenticatedClient.disconnect();
+		});
+	});
+
+	describe("Test dynamic namespace", () => {
+		const namespace = "/test";
+		const handler = "dynamic";
+
+		it("should create new namespace", async () => {
+			const item = svc.settings.io.namespaces[handler];
+
+			expect(Array.from(svc.io._nsps.keys())).toEqual(["/", "/admin"]);
+
+			svc.registerNamespace(namespace, handler, item);
+
+			expect(Array.from(svc.io._nsps.keys())).toEqual(["/", "/admin", "/test"]);
+		});
+
+		it("should throw an error while creating namespace that already exists", async () => {
+			const item = svc.settings.io.namespaces[handler];
+
+			try {
+				svc.registerNamespace(namespace, handler, item);
+			} catch (error) {
+				expect(error.message).toEqual(`Namespace '/test' already exists`);
+			}
+		});
+
+		it("should call an action with dynamic namespace", async () => {
+			let client = io.connect(`ws://localhost:${port}${namespace}`, { forceNew: true });
+
+			const res = await call(client, "math.add", { a: 1, b: 2 });
+
+			expect(res).toEqual(3);
+
+			client.disconnect();
+		});
+
+		it("should remove namespace", async () => {
+			expect(Array.from(svc.io._nsps.keys())).toEqual(["/", "/admin", "/test"]);
+
+			svc.removeNamespace(namespace);
+
+			expect(Array.from(svc.io._nsps.keys())).toEqual(["/", "/admin"]);
+		});
+
+		it("should throw an error while removing a non existent namespace", async () => {
+			try {
+				svc.removeNamespace("/non-existent");
+			} catch (error) {
+				expect(error.message).toEqual(`Namespace '/non-existent' does not exist`);
+			}
 		});
 	});
 

@@ -67,6 +67,12 @@ const serviceSchema = {
 				);
 			}
 		}
+	},
+
+	methods: {
+		listIOHandlers() {
+			return this.settings.io.handlers;
+		}
 	}
 };
 

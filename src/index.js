@@ -233,10 +233,6 @@ module.exports = {
 		}
 	},
 	methods: {
-		listIOHandlers() {
-			return this.settings.io.handlers;
-		},
-
 		/**
 		 * Remove namespace and disconnects matching Sockets
 		 * @param {String} nsp Namespace
@@ -246,8 +242,8 @@ module.exports = {
 			const namespace = this.io._nsps.get(nps);
 
 			if (!namespace) {
-				this.logger.debug(`Namespace '${nsp}' does not exists`);
-				throw new Error(`Namespace '${nsp}' does not exists`);
+				this.logger.debug(`Namespace '${nps}' does not exist`);
+				throw new Error(`Namespace '${nps}' does not exist`);
 			}
 			// More info: https://socket.io/docs/v4/server-api/#namespacedisconnectsocketsclose
 			namespace.disconnectSockets();
