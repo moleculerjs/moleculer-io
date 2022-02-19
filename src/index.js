@@ -23,13 +23,13 @@ module.exports = {
 		io: {
 			/** @type {import('socket.io').ServerOptions} */
 			// options: {}, //socket.io options
+			/** @type {Record<String, HandlerItem} */
 			namespaces: {
 				"/": {
 					// authorization: false,
 					// middlewares: [],
 					// packetMiddlewares:[],
 					events: {
-						/** @type {NamespaceEvent} */
 						call: {
 							// whitelist: [],
 							// aliases: {},
@@ -470,6 +470,7 @@ function makeHandler(svc, handlerItem) {
 /**
  * @typedef HandlerItem
  * @property {Boolean?} authorization Flag indicating whether to use auth.
+ * @property {Boolean?} createNamespace If set to 'false' won't create IO namespace. Will only create the handler(s)
  * @property {Array<Function>?} middlewares
  * @property {Array<Function>?} packetMiddlewares Socket.IO middleware. More info: https://socket.io/docs/v3/middlewares/
  * @property {Record<string,NamespaceEvent>} events
