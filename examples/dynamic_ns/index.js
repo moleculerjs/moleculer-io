@@ -1,3 +1,5 @@
+"use strict";
+
 const { ServiceBroker } = require("moleculer");
 const SocketIOService = require("../../");
 
@@ -21,6 +23,9 @@ const serviceSchema = {
 				 * They are referenced at this.settings.io.handlers
 				 */
 				dynamic: {
+					// Don't create IO namespace
+					// Will only create the handler(s)
+					createNamespace: false,
 					events: {
 						call: {
 							onBeforeCall: async function (ctx, socket, args) {
@@ -42,13 +47,24 @@ const serviceSchema = {
 				return this.listIOHandlers();
 			}
 		},
+		removeNamespace: {
+			async handler(ctx) {
+				return this.removeNamespace(ctx.params.namespace);
+			}
+		},
 		addNamespace: {
 			params: {
 				namespace: "string", // Name of namespace
-				handler: "string" // Handler(s) to be used
+				handler: "string" // Handler(s) to use
 			},
 			async handler(ctx) {
-				return this.registerNamespace(ctx.params.namespace, ctx.params.handler);
+				const item = ctx.params.handler;
+
+				return this.registerNamespace(
+					ctx.params.namespace, // New namespace
+					ctx.params.handler, // Handler(s) to be used
+					this.settings.io.namespaces[ctx.params.handler] // Auth, middleware to ue
+				);
 			}
 		}
 	}
@@ -86,28 +102,30 @@ broker.start().then(async () => {
 	const handlerHame = "dynamic";
 
 	const handlersList = await broker.call("io.listIOHandlers");
-	console.log(handlersList);
 
 	await broker.call("io.addNamespace", {
 		namespace, // Dynamically create '/test' namespace
 		handler: handlerHame // Select the handler to be used by the namespace
 	});
 
-	clientBase = IOclient.connect("http://localhost:3000");
-	clientTestNamespace = IOclient.connect("http://localhost:3000" + namespace);
+	let clientBase = IOclient.connect("http://localhost:3000");
+	let clientTestNamespace = IOclient.connect("http://localhost:3000" + namespace);
 
 	try {
-		const resBaseNamespace = await callAwait(clientBase, "greeter.welcome", {
+		let resBaseNamespace = await callAwait(clientBase, "greeter.welcome", {
 			namespace: "/"
 		});
 		console.log(resBaseNamespace);
 
-		const resTestNamespace = await callAwait(clientTestNamespace, "greeter.dynamic", {
+		let resTestNamespace = await callAwait(clientTestNamespace, "greeter.dynamic", {
 			namespace: "/test"
 		});
 		console.log(resTestNamespace);
+
+		// Remove namespace and close client connections
+		await broker.call("io.removeNamespace", { namespace });
 	} catch (error) {
-		broker.logger.err(error);
+		broker.logger.error(error);
 	} finally {
 		clientBase.disconnect();
 		clientTestNamespace.disconnect();

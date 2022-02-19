@@ -82,7 +82,7 @@ module.exports = {
 		Object.keys(namespaces).forEach(nsp => {
 			const item = namespaces[nsp];
 
-			this.registerNamespace(nsp, nsp, item);
+			if (item.createNamespace !== false) this.registerNamespace(nsp, nsp, item);
 		});
 
 		this.logger.info("Socket.IO Websocket Gateway started.");
@@ -238,16 +238,34 @@ module.exports = {
 		},
 
 		/**
+		 * Remove namespace and disconnects matching Sockets
+		 * @param {String} nsp Namespace
+		 */
+		removeNamespace(nps) {
+			/** @type {import('socket.io').Namespace} */
+			const namespace = this.io._nsps.get(nps);
+
+			if (!namespace) {
+				this.logger.debug(`Namespace '${nsp}' does not exists`);
+				throw new Error(`Namespace '${nsp}' does not exists`);
+			}
+			// More info: https://socket.io/docs/v4/server-api/#namespacedisconnectsocketsclose
+			namespace.disconnectSockets();
+			this.io._nsps.delete(nps);
+		},
+
+		/**
 		 * Register a namespace
 		 * @param {String} nsp Namespace
 		 * @param {String} handlerName Name handler registered in created()
 		 * @param {HandlerItem} item
 		 */
 		registerNamespace(nsp, handlerName, item) {
-			/*if (Array.from(this.io._nsps.keys()).includes(nsp)) {
+			const [defaultNsp, ...remainingNsps] = Array.from(this.io._nsps.keys());
+			if (remainingNsps.includes(nsp)) {
 				this.logger.debug(`Namespace '${nsp}' already exists`);
 				throw new Error(`Namespace '${nsp}' already exists`);
-			}*/
+			}
 
 			/** @type {import('socket.io').Namespace} */
 			const namespace = this.io.of(nsp);
