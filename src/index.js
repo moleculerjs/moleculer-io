@@ -289,9 +289,17 @@ module.exports = {
 					namespace.use(middleware.bind(this));
 				}
 			}
+
 			// Handlers generated in created()
 			const handlers = this.settings.io.handlers[handlerName];
 			namespace.on("connection", socket => {
+				const labels = { namespace: nsp };
+				this.broker.metrics.increment(C.METRIC_SOCKET_IO_SOCKETS, labels);
+
+				socket.on("disconnect", reason => {
+					this.broker.metrics.decrement(C.METRIC_SOCKET_IO_SOCKETS, labels);
+				});
+
 				socket.$service = this;
 				this.logger.info(`(nsp:'${nsp}') Client connected:`, socket.id);
 				if (item && item.packetMiddlewares) {
@@ -514,6 +522,14 @@ function registerMetrics(broker) {
 		labelNames: ["socket.io"],
 		quantiles: true,
 		unit: "msg"
+	});
+
+	broker.metrics.register({
+		type: METRIC.TYPE_GAUGE,
+		name: C.METRIC_SOCKET_IO_SOCKETS,
+		labelNames: ["socket.io"],
+		rate: true,
+		unit: "socket"
 	});
 }
 
