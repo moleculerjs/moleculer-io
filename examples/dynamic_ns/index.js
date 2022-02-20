@@ -63,7 +63,7 @@ const serviceSchema = {
 				return this.registerNamespace(
 					ctx.params.namespace, // New namespace
 					ctx.params.handler, // Handler(s) to be used
-					this.settings.io.namespaces[ctx.params.handler] // Auth, middleware to ue
+					this.settings.io.namespaces[ctx.params.handler] // Auth, middleware to use
 				);
 			}
 		}

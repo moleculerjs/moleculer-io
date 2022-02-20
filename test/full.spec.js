@@ -468,6 +468,12 @@ describe("Test full features", () => {
 
 			const res = await call(client, "math.add", { a: 1, b: 2 });
 
+			expect(FLOW).toEqual([
+				"Dynamic onBeforeCall",
+				"action: math.add",
+				"Dynamic onAfterCall"
+			]);
+
 			expect(res).toEqual(3);
 
 			client.disconnect();
