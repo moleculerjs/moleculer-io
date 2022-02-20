@@ -17,6 +17,16 @@ const broker = new ServiceBroker({
 		TRANSIT: "info",
 		IO: "debug",
 		"**": "info"
+	},
+
+	metrics: {
+		enabled: true,
+		reporter: {
+			type: "Console",
+			options: {
+				includes: ["moleculer.io.**"]
+			}
+		}
 	}
 });
 
