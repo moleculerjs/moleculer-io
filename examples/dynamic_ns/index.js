@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 "use strict";
 
 const { ServiceBroker } = require("moleculer");
@@ -105,13 +107,13 @@ broker.start().then(async () => {
 	broker.repl();
 
 	const namespace = "/test";
-	const handlerHame = "dynamic";
+	const handlerName = "dynamic";
 
-	const handlersList = await broker.call("io.listIOHandlers");
+	//const handlersList = await broker.call("io.listIOHandlers");
 
 	await broker.call("io.addNamespace", {
 		namespace, // Dynamically create '/test' namespace
-		handler: handlerHame // Select the handler to be used by the namespace
+		handler: handlerName // Select the handler to be used by the namespace
 	});
 
 	let clientBase = IOclient.connect("http://localhost:3000");
