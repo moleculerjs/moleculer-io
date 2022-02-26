@@ -12,6 +12,8 @@ const { match } = require("moleculer").Utils;
 const { ServiceNotFoundError } = require("moleculer").Errors;
 const { BadRequestError } = require("./errors");
 const kleur = require("kleur");
+const { METRIC } = require("moleculer");
+const C = require("./constants");
 
 /** @type {import('moleculer').ServiceSchema SocketIOMixin}*/
 module.exports = {
@@ -50,6 +52,8 @@ module.exports = {
 
 	/** @this {import('moleculer').Service} */
 	created() {
+		registerMetrics(this.broker);
+
 		const handlers = {};
 		/** @type {Record<String, HandlerItem>} */
 		const namespaces = this.settings.io.namespaces;
@@ -285,9 +289,17 @@ module.exports = {
 					namespace.use(middleware.bind(this));
 				}
 			}
+
 			// Handlers generated in created()
 			const handlers = this.settings.io.handlers[handlerName];
 			namespace.on("connection", socket => {
+				const labels = { namespace: nsp };
+				this.broker.metrics.increment(C.METRIC_SOCKET_IO_SOCKETS_ACTIVE, labels);
+
+				socket.on("disconnect", reason => {
+					this.broker.metrics.decrement(C.METRIC_SOCKET_IO_SOCKETS_ACTIVE, labels);
+				});
+
 				socket.$service = this;
 				this.logger.info(`(nsp:'${nsp}') Client connected:`, socket.id);
 				if (item && item.packetMiddlewares) {
@@ -441,15 +453,29 @@ function makeHandler(svc, handlerItem) {
 		svc.logger.info(`   => Client '${this.id}' call '${action}'`);
 		if (svc.settings.logRequestParams && svc.settings.logRequestParams in svc.logger)
 			svc.logger[svc.settings.logRequestParams]("   Params:", params);
+
+		const labels = { namespace: this.nsp.name, rooms: Array.from(this.rooms.keys()) };
+		const timeEnd = svc.broker.metrics.timer(C.METRIC_SOCKET_IO_MESSAGES_TIME, labels);
+		svc.broker.metrics.increment(C.METRIC_SOCKET_IO_MESSAGES_TOTAL, labels);
+		svc.broker.metrics.increment(C.METRIC_SOCKET_IO_MESSAGES_ACTIVE, labels);
+
 		try {
 			if (_.isFunction(params)) {
 				respond = params;
 				params = null;
 			}
+
 			const res = await svc.actions.call({ socket: this, action, params, handlerItem });
+
+			timeEnd();
+			svc.broker.metrics.decrement(C.METRIC_SOCKET_IO_MESSAGES_ACTIVE, labels);
+
 			svc.logger.info(`   <= ${kleur.green().bold("Success")} ${action}`);
 			if (_.isFunction(respond)) respond(null, res);
 		} catch (err) {
+			timeEnd();
+			svc.broker.metrics.decrement(C.METRIC_SOCKET_IO_MESSAGES_ACTIVE, labels);
+
 			if (svc.settings.log4XXResponses || (err && !_.inRange(err.code, 400, 500))) {
 				svc.logger.error(
 					"   Request error!",
@@ -465,6 +491,46 @@ function makeHandler(svc, handlerItem) {
 			if (_.isFunction(respond)) svc.socketOnError(err, respond);
 		}
 	};
+}
+
+/**
+ *
+ * @param {import('moleculer').ServiceBroker} broker
+ */
+function registerMetrics(broker) {
+	if (!broker.isMetricsEnabled()) return;
+
+	broker.metrics.register({
+		type: METRIC.TYPE_COUNTER,
+		name: C.METRIC_SOCKET_IO_MESSAGES_TOTAL,
+		labelNames: ["socket.io"],
+		rate: true,
+		unit: "msg"
+	});
+
+	broker.metrics.register({
+		type: METRIC.TYPE_GAUGE,
+		name: C.METRIC_SOCKET_IO_MESSAGES_ACTIVE,
+		labelNames: ["socket.io"],
+		rate: true,
+		unit: "msg"
+	});
+
+	broker.metrics.register({
+		type: METRIC.TYPE_HISTOGRAM,
+		name: C.METRIC_SOCKET_IO_MESSAGES_TIME,
+		labelNames: ["socket.io"],
+		quantiles: true,
+		unit: "msg"
+	});
+
+	broker.metrics.register({
+		type: METRIC.TYPE_GAUGE,
+		name: C.METRIC_SOCKET_IO_SOCKETS_ACTIVE,
+		labelNames: ["socket.io"],
+		rate: true,
+		unit: "socket"
+	});
 }
 
 /**
