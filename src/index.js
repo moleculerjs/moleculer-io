@@ -294,10 +294,10 @@ module.exports = {
 			const handlers = this.settings.io.handlers[handlerName];
 			namespace.on("connection", socket => {
 				const labels = { namespace: nsp };
-				this.broker.metrics.increment(C.METRIC_SOCKET_IO_SOCKETS, labels);
+				this.broker.metrics.increment(C.METRIC_SOCKET_IO_SOCKETS_ACTIVE, labels);
 
 				socket.on("disconnect", reason => {
-					this.broker.metrics.decrement(C.METRIC_SOCKET_IO_SOCKETS, labels);
+					this.broker.metrics.decrement(C.METRIC_SOCKET_IO_SOCKETS_ACTIVE, labels);
 				});
 
 				socket.$service = this;
@@ -526,7 +526,7 @@ function registerMetrics(broker) {
 
 	broker.metrics.register({
 		type: METRIC.TYPE_GAUGE,
-		name: C.METRIC_SOCKET_IO_SOCKETS,
+		name: C.METRIC_SOCKET_IO_SOCKETS_ACTIVE,
 		labelNames: ["socket.io"],
 		rate: true,
 		unit: "socket"
