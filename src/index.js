@@ -59,8 +59,7 @@ module.exports = {
 		const namespaces = this.settings.io.namespaces;
 		for (const nsp in namespaces) {
 			const item = namespaces[nsp];
-			if (this.settings.logRouteRegistration && this.settings.logRouteRegistration in this.logger)
-				this.logger[this.settings.logRouteRegistration](`Add '${nsp}' route:`, item);
+			this.logWithLevel(this.settings.logRouteRegistration, `Add '${nsp}' route:`, item);
 			if (!handlers[nsp]) handlers[nsp] = {};
 
 			const events = item.events;
@@ -199,8 +198,7 @@ module.exports = {
 				rooms: { type: "array", items: "string", optional: true }
 			},
 			async handler(ctx) {
-				if (svc.settings.logRequest && svc.settings.logRequest in svc.logger)
-					svc.logger[svc.settings.logRequest]("broadcast: ", ctx.params);
+				this.logWithLevel(this.settings.logBroadcastRequest, "broadcast: ", ctx.params);
 				let namespace = this.io;
 				if (ctx.params.namespace) {
 					namespace = namespace.of(ctx.params.namespace);
@@ -303,8 +301,11 @@ module.exports = {
 				});
 
 				socket.$service = this;
-				if (svc.settings.logRequest && svc.settings.logRequest in svc.logger)
-					svc.logger[svc.settings.logRequest](`(nsp:'${nsp}') Client connected:`, socket.id);
+				this.logWithLevel(
+					this.settings.logClientConnection,
+					`(nsp:'${nsp}') Client connected:`,
+					socket.id
+				);
 				if (item && item.packetMiddlewares) {
 					//socket middlewares
 					for (const middleware of item.packetMiddlewares) {
@@ -405,6 +406,17 @@ module.exports = {
 		socketLeaveRoom(socket, room) {
 			this.logger.debug(`socket ${socket.id} leave room:`, room);
 			socket.leave(room);
+		},
+		/**
+		 *
+		 * @param {String} level Level used to log
+		 * @param {any} args Arguments
+		 * @returns
+		 */
+		logWithLevel(level, ...args) {
+			if (level && level in this.logger) {
+				this.logger[level](...args);
+			}
 		}
 	}
 };
@@ -453,10 +465,8 @@ function makeAuthorizeMiddleware(svc, handlerItem) {
 function makeHandler(svc, handlerItem) {
 	svc.logger.debug("makeHandler:", handlerItem);
 	return async function (action, params, respond) {
-		if (svc.settings.logRequest && svc.settings.logRequest in svc.logger)
-			svc.logger[svc.settings.logRequest](`   => Client '${this.id}' call '${action}'`);
-		if (svc.settings.logRequestParams && svc.settings.logRequestParams in svc.logger)
-			svc.logger[svc.settings.logRequestParams]("   Params:", params);
+		svc.logWithLevel(svc.settings.logRequest, `   => Client '${this.id}' call '${action}'`);
+		svc.logWithLevel(svc.settings.logRequestParams, "   Params:", params);
 
 		const labels = { namespace: this.nsp.name, rooms: Array.from(this.rooms.keys()) };
 		const timeEnd = svc.broker.metrics.timer(C.METRIC_SOCKET_IO_MESSAGES_TIME, labels);
@@ -474,8 +484,10 @@ function makeHandler(svc, handlerItem) {
 			timeEnd();
 			svc.broker.metrics.decrement(C.METRIC_SOCKET_IO_MESSAGES_ACTIVE, labels);
 
-			if (svc.settings.logResponse && svc.settings.logResponse in svc.logger)
-				svc.logger[svc.settings.logResponse](`   <= ${kleur.green().bold("Success")} ${action}`);
+			svc.logWithLevel(
+				svc.settings.logResponse,
+				`   <= ${kleur.green().bold("Success")} ${action}`
+			);
 			if (_.isFunction(respond)) respond(null, res);
 		} catch (err) {
 			timeEnd();
