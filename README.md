@@ -41,6 +41,7 @@ $ npm install moleculer-io
   - [Broadcast](#broadcast)
   - [CORS](#cors)
   - [Using multiple instances](#using-multiple-instances)
+  - [Logging settings](#logging-settings)
   - [Full settings](#full-settings)
   - [License](#license)
   - [Contact](#contact)
@@ -598,6 +599,39 @@ broker.createService({
   }
 })
 ```
+
+## Logging settings
+
+If you want to keep clean your project console or have a more deep way to debug the data sent over the socket you can just change some settings in your service to add/remove logs:
+
+- **logRequest**: Log all the incoming request through the socket
+- **logRequestParams**: Log the request params
+- **logResponse**: Log response data
+- **logBroadcastRequest**: Log the request to forward to the sockets
+- **logClientConnection**: Log when a client gets connected
+
+To start logging something indicate whatever logging level you want:
+
+```javascript
+const broker = new ServiceBroker({
+    transporter: "redis://redis:6379"
+})
+broker.createService({
+  name: 'io',
+  mixins: [SocketIOService],
+  settings: {
+    logClientConnection: 'info'
+    port: 3000,
+    io: {
+      options: {
+        adapter: require("socket.io-redis")("redis://redis:6379")
+      }
+    }
+  }
+})
+```
+
+logRequest, logRequestParams, logResponse are adopted from the API gateway, the other ones are managed only in this one and by default they are disabled
 
 ## Full settings
 
