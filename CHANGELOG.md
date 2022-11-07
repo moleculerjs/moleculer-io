@@ -1,6 +1,6 @@
-<a name="v2.1.1"></a>
+<a name="v2.2.0"></a>
 
-# [2.1.1](https://github.com/moleculerjs/moleculer-io/compare/v2.1.0...v2.1.1) (2022-11-07)
+# [2.2.0](https://github.com/moleculerjs/moleculer-io/compare/v2.1.0...v2.2.0) (2022-11-07)
 
 - Prevent request/response log based on settings [#52](https://github.com/moleculerjs/moleculer-io/pull/52)
 
