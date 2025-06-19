@@ -141,7 +141,7 @@ declare module "moleculer-io" {
 	type SocketJoinRoomsFunction = (socket: SocketMoleculerIO, rooms: string | string[]) => void;
 	type SocketLeaveRoomFunction = (socket: SocketMoleculerIO, room: string) => void;
 
-	interface IOMethods extends ServiceMethods {
+	interface IOServiceMethods extends ServiceMethods {
 		initSocketIO: InitSocketIOFunction;
 		socketAuthorize: SocketAuthorizeFunction;
 		socketGetMeta: SocketGetMetaFunction;
@@ -159,11 +159,11 @@ declare module "moleculer-io" {
 	}
 	export interface IOServiceSchema
 		extends ServiceSchema<
-			ApiSettingsSchema & {
+			ServiceSettingSchema & ApiSettingsSchema & {
 				io?: IOSetting;
 			}
 		> {
-		methods: Partial<IOMethods> & ThisType<IOServiceSchema>;
+		// methods: Partial<IOServiceMethods> & ThisType<IOServiceSchema>;
 	}
 
 	const SocketIOMixin: Partial<IOServiceSchema>;
