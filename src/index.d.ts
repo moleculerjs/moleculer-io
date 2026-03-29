@@ -15,6 +15,23 @@ declare module "moleculer-io" {
 	import * as http from "http";
 	import { SocketOptions } from "socket.io-client";
 
+	/**
+	 * Socket meta fields injected by moleculer-io into `ctx.meta`
+	 * when handling socket.io requests.
+	 */
+	interface SocketIOMeta {
+		/** The socket.io socket ID of the caller */
+		$socketId: string;
+		/** Rooms the socket is currently in */
+		$rooms: string[];
+		/** Room(s) to join after the action call */
+		$join?: string | string[];
+		/** Room(s) to leave after the action call */
+		$leave?: string | string[];
+		/** Authenticated user info (set by socketAuthorize) */
+		user?: any;
+	}
+
 	class ClientMoleculerIO<
 		ClientUser,
 		ListenEvents extends EventsMap,
@@ -38,7 +55,7 @@ declare module "moleculer-io" {
 		 * The `event` has a `mappingPolicy` property to handle events without aliases.
 		 * - all - enable to handle all actions with or without aliases (default)
 		 * - restrict - enable to handle only the actions with aliases
-		 * @see https://moleculer.services/docs/0.14/moleculer-web.html#Mapping-policy
+		 * @see https://moleculer.services/docs/moleculer-web.html#Mapping-policy
 		 * @default: "all"
 		 */
 		mappingPolicy: "all" | "restrict";
@@ -57,7 +74,7 @@ declare module "moleculer-io" {
 		 * @see https://github.com/moleculerjs/moleculer-io#handler-hooks
 		 */
 		onBeforeCall<P = any>(
-			ctx: Context<Record<string, any>, Record<any, any>>,
+			ctx: Context<Record<string, any>, SocketIOMeta>,
 			socket: SocketMoleculerIO,
 			action: string,
 			params: P,
@@ -68,7 +85,7 @@ declare module "moleculer-io" {
 		 * @see https://github.com/moleculerjs/moleculer-io#handler-hooks
 		 */
 		onAfterCall<ORIGINAL_RES = any, MODIFIED_RES = any>(
-			ctx: Context<Record<string, any>>,
+			ctx: Context<Record<string, any>, SocketIOMeta>,
 			socket: SocketMoleculerIO,
 			res: ORIGINAL_RES
 		): Promise<void | MODIFIED_RES>;
@@ -100,6 +117,8 @@ declare module "moleculer-io" {
 
 	interface IONamespace {
 		authorization?: boolean;
+		/** If set to `false`, won't create IO namespace. Will only create the handler(s) */
+		createNamespace?: boolean;
 		middlewares?: NamespaceMiddlewareFunction[];
 		packetMiddlewares?: SocketMiddlewareFunction[];
 
@@ -121,25 +140,20 @@ declare module "moleculer-io" {
 		socket: Socket,
 		handlerItem: IONamespace
 	) => Promise<USER | void>;
-	type SocketGetMetaFunction = <
-		META = {
-			user: any;
-			$rooms: string[];
-		}
-	>(
-		socket: SocketMoleculerIO
-	) => Promise<META>;
+	type SocketGetMetaFunction = (socket: SocketMoleculerIO) => SocketIOMeta;
 	type SocketSaveMetaFunction = (
 		socket: SocketMoleculerIO,
-		ctx: Context<any, any>
-	) => Promise<void>;
-	type SocketSaveUserFunction = (socket: Socket, user: any) => Promise<void>;
+		ctx: Context<any, SocketIOMeta>
+	) => void;
+	type SocketSaveUserFunction = (socket: Socket, user: any) => void;
 	type SocketOnErrorFunction = (
 		err: Error,
 		respond: (error: Error | null, ...data: any[]) => void
 	) => void;
 	type SocketJoinRoomsFunction = (socket: SocketMoleculerIO, rooms: string | string[]) => void;
 	type SocketLeaveRoomFunction = (socket: SocketMoleculerIO, room: string) => void;
+	type RegisterNamespaceFunction = (nsp: string, handlerName: string, item?: IONamespace) => void;
+	type RemoveNamespaceFunction = (nsp: string) => void;
 
 	interface IOServiceMethods extends ServiceMethods {
 		initSocketIO: InitSocketIOFunction;
@@ -156,12 +170,15 @@ declare module "moleculer-io" {
 		socketOnError: SocketOnErrorFunction;
 		socketJoinRooms: SocketJoinRoomsFunction;
 		socketLeaveRoom: SocketLeaveRoomFunction;
+		registerNamespace: RegisterNamespaceFunction;
+		removeNamespace: RemoveNamespaceFunction;
 	}
 	export interface IOServiceSchema
 		extends ServiceSchema<
-			ServiceSettingSchema & ApiSettingsSchema & {
-				io?: IOSetting;
-			}
+			ServiceSettingSchema &
+				ApiSettingsSchema & {
+					io?: IOSetting;
+				}
 		> {
 		// methods: Partial<IOServiceMethods> & ThisType<IOServiceSchema>;
 	}

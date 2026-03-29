@@ -1,3 +1,43 @@
+<a name="v3.0.0"></a>
+
+# 3.0.0
+
+## Breaking changes
+- **Minimum Node.js version raised to v22** (from v10).
+- **Minimum Moleculer version raised to v0.14** (dropped v0.13 support from peerDependencies).
+- Deprecated `socket.io-redis` adapter replaced with `@socket.io/redis-adapter` in examples.
+- Deprecated `broker.createService(schema, schemaMods)` usage removed from tests (use `mixins` instead).
+- Jest upgraded to v30 — deprecated assertion aliases (`toBeCalledTimes`, `toBeCalledWith`) replaced with canonical names.
+
+## Moleculer 0.15 compatibility
+- **Streaming API updated**: examples now use the new calling options pattern (`{ stream }`) instead of passing stream as `ctx.params`. The `file.save` example reads from `ctx.stream` instead of `ctx.params.pipe()`.
+- **TypeScript definitions updated** for Moleculer 0.15:
+  - Added `SocketIOMeta` interface with typed meta fields (`$socketId`, `$rooms`, `$join`, `$leave`, `user`).
+  - Hook signatures (`onBeforeCall`, `onAfterCall`) now use typed `Context<..., SocketIOMeta>`.
+  - Added `registerNamespace` and `removeNamespace` to `IOServiceMethods`.
+  - Added `createNamespace` option to `IONamespace` interface.
+
+## Dependency upgrades
+- **ESLint**: migrated from v8 to v9 with flat config (`eslint.config.js`).
+  - `eslint-plugin-node` → `eslint-plugin-n` v17
+  - `eslint-plugin-promise` v5 → v7
+  - `eslint-plugin-security` v1 → v4
+  - `eslint-plugin-prettier` v4 → v5, `eslint-config-prettier` v8 → v10
+  - `prettier` v2 → v3
+- **Jest**: v27 → v30 (removed separate `jest-cli`).
+- **socket.io**: v4.5 → v4.8 (both server and client).
+- **express**: v4 → v5, **nodemon**: v2 → v3, **winston**: v3.8 → v3.19.
+- **moleculer**: devDep updated to `^0.15.0`, **moleculer-repl**: `^0.8.0`, **moleculer-web**: `^0.11.0`.
+- **lodash**: v4.17.21 → v4.17.23.
+
+## Other changes
+- Sanitized filename with `path.basename()` in file upload example to prevent path traversal.
+- Added minimal `file` service to test helper for upload handler completeness.
+- Updated CI workflow to test on Node.js 22 and 24 (using `actions/checkout@v4`, `actions/setup-node@v4`).
+- Updated copyright years to 2026.
+
+---
+
 <a name="v2.2.0"></a>
 
 # [2.2.0](https://github.com/moleculerjs/moleculer-io/compare/v2.1.0...v2.2.0) (2022-11-07)

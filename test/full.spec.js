@@ -267,8 +267,8 @@ describe("Test full features", () => {
 				"action: math.add",
 				"after hook"
 			]);
-			expect(beforeCall).toBeCalledTimes(1);
-			expect(beforeCall).toBeCalledWith(
+			expect(beforeCall).toHaveBeenCalledTimes(1);
+			expect(beforeCall).toHaveBeenCalledWith(
 				expect.any(Context),
 				expect.any(Socket),
 				"math.add",
@@ -281,8 +281,8 @@ describe("Test full features", () => {
 					}
 				}
 			);
-			expect(afterCall).toBeCalledTimes(1);
-			expect(afterCall).toBeCalledWith(expect.any(Context), expect.any(Socket), 3);
+			expect(afterCall).toHaveBeenCalledTimes(1);
+			expect(afterCall).toHaveBeenCalledWith(expect.any(Context), expect.any(Socket), 3);
 		});
 
 		it("call with wrong params", async () => {
@@ -361,8 +361,8 @@ describe("Test full features", () => {
 			});
 			expect(res).toBe("custom-ok");
 			expect(FLOW).toEqual(["packet middleware", "custom-5"]);
-			expect(beforeCall).toBeCalledTimes(0);
-			expect(afterCall).toBeCalledTimes(0);
+			expect(beforeCall).toHaveBeenCalledTimes(0);
+			expect(afterCall).toHaveBeenCalledTimes(0);
 		});
 	});
 
@@ -387,8 +387,8 @@ describe("Test full features", () => {
 				"action: top-secret.hello",
 				"after hook"
 			]);
-			expect(beforeCall).toBeCalledTimes(1);
-			expect(beforeCall).toBeCalledWith(
+			expect(beforeCall).toHaveBeenCalledTimes(1);
+			expect(beforeCall).toHaveBeenCalledWith(
 				expect.any(Context),
 				expect.any(Socket),
 				"top-secret.hello",
@@ -406,8 +406,8 @@ describe("Test full features", () => {
 					timeout: 500
 				}
 			);
-			expect(afterCall).toBeCalledTimes(1);
-			expect(afterCall).toBeCalledWith(
+			expect(afterCall).toHaveBeenCalledTimes(1);
+			expect(afterCall).toHaveBeenCalledWith(
 				expect.any(Context),
 				expect.any(Socket),
 				"Moleculer hello"
