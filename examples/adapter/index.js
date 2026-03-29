@@ -2,7 +2,11 @@
 
 const { ServiceBroker } = require("moleculer");
 const SocketIOService = require("../../");
-const redis = require("socket.io-redis");
+const { createAdapter } = require("@socket.io/redis-adapter");
+const { createClient } = require("redis");
+
+const pubClient = createClient({ url: "redis://localhost:6379" });
+const subClient = pubClient.duplicate();
 
 const broker = new ServiceBroker();
 
@@ -13,7 +17,7 @@ broker.createService({
 		port: 3000,
 		io: {
 			options: {
-				adapter: redis({ host: "localhost", port: 6379 })
+				adapter: createAdapter(pubClient, subClient)
 			}
 		}
 	}

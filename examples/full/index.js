@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 
 const { ServiceBroker } = require("moleculer");
-const redisAdapter = require("socket.io-redis");
+// const { createAdapter } = require("@socket.io/redis-adapter");
 const SocketIOService = require("../../");
 const express = require("express");
 const fs = require("fs");
