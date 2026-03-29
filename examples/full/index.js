@@ -94,7 +94,11 @@ broker.createService({
 		save: {
 			handler(ctx) {
 				return new this.Promise((resolve, reject) => {
-					const filePath = path.join(__dirname, "public/upload", ctx.meta.filename);
+					const filePath = path.join(
+						__dirname,
+						"public/upload",
+						ctx.params.filename
+					);
 					const f = fs.createWriteStream(filePath);
 					f.on("close", () => {
 						this.logger.info(`Uploaded file stored in '${filePath}'`);
@@ -102,7 +106,7 @@ broker.createService({
 					});
 					f.on("error", err => reject(err));
 
-					ctx.params.pipe(f);
+					ctx.stream.pipe(f);
 				});
 			}
 		}
@@ -148,11 +152,11 @@ const ioService = broker.createService({
 							let stream = new Duplex();
 							stream.push(file);
 							stream.push(null);
-							await this.$service.broker.call("file.save", stream, {
-								meta: {
-									filename: name
-								}
-							});
+							await this.$service.broker.call(
+								"file.save",
+								{ filename: name },
+								{ stream }
+							);
 							respond(null, name);
 						}
 					}

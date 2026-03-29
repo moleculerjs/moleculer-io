@@ -48,11 +48,11 @@ const ioService = broker.createService({
 							let stream = new Duplex();
 							stream.push(file);
 							stream.push(null);
-							await this.$service.broker.call("file.save", stream, {
-								meta: {
-									filename: name
-								}
-							});
+							await this.$service.broker.call(
+								"file.save",
+								{ filename: name },
+								{ stream }
+							);
 							respond(null, name);
 						}
 					}

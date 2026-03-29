@@ -1,6 +1,6 @@
 /*
  * moleculer-io
- * Copyright (c) 2021 MoleculerJS (https://github.com/moleculerjs/moleculer-io)
+ * Copyright (c) 2021-2026 MoleculerJS (https://github.com/moleculerjs/moleculer-io)
  * MIT Licensed
  */
 

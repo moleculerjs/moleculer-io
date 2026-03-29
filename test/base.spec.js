@@ -17,7 +17,10 @@ describe("Test with default settings", () => {
 
 	beforeAll(async () => {
 		broker = new ServiceBroker({ logLevel: "error" });
-		const svc = broker.createService(SocketIOService, { settings: { port: 0 } });
+		const svc = broker.createService({
+			mixins: [SocketIOService],
+			settings: { port: 0 }
+		});
 
 		broker.createService({
 			name: "greeter",

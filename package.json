@@ -41,9 +41,9 @@
     "express": "^4.18.1",
     "jest": "^27.4.7",
     "jest-cli": "^27.4.7",
-    "moleculer": "^0.14.22",
-    "moleculer-repl": "^0.7.1",
-    "moleculer-web": "^0.10.4",
+    "moleculer": "^0.15.0",
+    "moleculer-repl": "^0.8.0",
+    "moleculer-web": "^0.11.0",
     "nodemon": "^2.0.19",
     "prettier": "^2.7.1",
     "socket.io-client": "^4.5.1",
@@ -51,10 +51,10 @@
     "winston": "^3.8.1"
   },
   "peerDependencies": {
-    "moleculer": "^0.13.0 || ^0.14.0"
+    "moleculer": "^0.14.0 || ^0.15.0"
   },
   "engines": {
-    "node": ">= 10.x.x"
+    "node": ">= 22.x.x"
   },
   "jest": {
     "testEnvironment": "node",
