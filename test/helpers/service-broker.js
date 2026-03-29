@@ -138,4 +138,13 @@ broker.createService({
 	}
 });
 
+broker.createService({
+	name: "file",
+	actions: {
+		save(ctx) {
+			return { filename: ctx.params.filename };
+		}
+	}
+});
+
 module.exports = broker;

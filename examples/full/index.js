@@ -94,11 +94,8 @@ broker.createService({
 		save: {
 			handler(ctx) {
 				return new this.Promise((resolve, reject) => {
-					const filePath = path.join(
-						__dirname,
-						"public/upload",
-						ctx.params.filename
-					);
+					const safeFilename = path.basename(ctx.params.filename);
+					const filePath = path.join(__dirname, "public/upload", safeFilename);
 					const f = fs.createWriteStream(filePath);
 					f.on("close", () => {
 						this.logger.info(`Uploaded file stored in '${filePath}'`);
